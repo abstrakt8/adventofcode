@@ -81,8 +81,9 @@ pub fn run() {
 }
 
 
+#[cfg(test)]
 mod tests {
-    use crate::p1::{calibration_value, parse_digits_wtf};
+    use super::{calibration_value, parse_digits_wtf};
 
     #[test]
     fn test_calibration_value() {

@@ -101,8 +101,9 @@ pub fn solve() {
     println!("{:}", ans2);
 }
 
+#[cfg(test)]
 mod tests {
-    use crate::p3::{process1, process2};
+    use super::{process1, process2};
 
     #[test]
     fn test1() {

@@ -32,12 +32,12 @@ pub fn run(input: &str) -> u64 {
             let mut cur = it.clone();
             for ra in &ranges {
                 let (dst, src, delta) = (ra[0], ra[1], ra[2]);
-                if let Some(I) = intersect(cur, [src, src + delta - 1]) {
-                    if cur[0] < I[0] {
-                        next_intervals.push([cur[0], I[0] - 1]);
+                if let Some(inter) = intersect(cur, [src, src + delta - 1]) {
+                    if cur[0] < inter[0] {
+                        next_intervals.push([cur[0], inter[0] - 1]);
                     }
-                    next_intervals.push([dst + I[0] - src, dst + I[1] - src]);
-                    cur = [I[1] + 1, cur[1]];
+                    next_intervals.push([dst + inter[0] - src, dst + inter[1] - src]);
+                    cur = [inter[1] + 1, cur[1]];
 
                     if cur[0] > cur[1] {
                         break;

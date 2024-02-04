@@ -27,7 +27,6 @@ fn parse_rgb(input: &str) -> [i32; 3] {
 
 fn is_solvable(input: &str) -> bool {
     let sets: Vec<&str> = input.split("; ").collect();
-    let [R, G, B] = [0, 0, 0];
     for game in sets {
         let [r, g, b] = parse_rgb(game);
         if !(r <= RED && g <= GREEN && b <= BLUE) {
@@ -46,12 +45,12 @@ fn game_id_value(input: &str) -> i32 {
 
 fn power_value(input: &str) -> i32 {
     let sets: Vec<&str> = input.split("; ").collect();
-    let (mut R, mut G, mut B) = (0, 0, 0);
+    let (mut r1, mut g1, mut b1) = (0, 0, 0);
     for game in sets {
         let [r, g, b] = parse_rgb(game);
-        (R, G, B) = (max(R, r), max(G, g), max(B, b));
+        (r1, g1, b1) = (max(r1, r), max(g1, g), max(b1, b));
     }
-    return R * G * B;
+    return r1 * g1 * b1;
 }
 
 fn game_power_value(input: &str) -> i32 {
@@ -71,8 +70,9 @@ pub fn solve() {
 }
 
 
+#[cfg(test)]
 mod tests {
-    use crate::p2::{is_solvable, parse_game_id, parse_rgb, game_id_value, power_value};
+    use super::{is_solvable, parse_game_id, parse_rgb, game_id_value, power_value};
 
     #[test]
     fn test() {
