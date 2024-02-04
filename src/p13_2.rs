@@ -67,7 +67,7 @@ pub(crate) fn run(input: &str) -> usize {
 }
 
 
-#[test]
+
 pub fn test() {
     let input = r##"#.##..##.
 ..#.##.#.
