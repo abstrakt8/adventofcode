@@ -2,7 +2,7 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap};
 
 #[derive(Eq, PartialEq, Debug, Clone, Copy, Hash)]
-pub enum Direction {
+enum Direction {
     UP,
     DOWN,
     LEFT,
