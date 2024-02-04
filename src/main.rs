@@ -1,12 +1,10 @@
-use std::cell::Cell;
 use std::fs;
 
-mod p15;
-mod p15_2;
+mod p16;
+mod p16_2;
 
 fn main() {
-    let content = fs::read_to_string("15.in")
+    let content = fs::read_to_string("16.in")
         .expect("Should have been able to read the file");
-    // println!("{}", p15::run(&content));
-    println!("{}", p15_2::run(&content));
+    println!("{}", p16_2::run(&content));
 }
