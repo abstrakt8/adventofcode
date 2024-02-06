@@ -1,8 +1,11 @@
+use rayon::prelude::*;
 use std::cell::RefCell;
 use std::cmp::min;
 use std::collections::HashMap;
 use std::iter::repeat;
+use std::ops::{Deref, DerefMut};
 use std::slice::Iter;
+use std::sync::{Arc, Mutex};
 
 // TODO: Make it generic not just for &str, just anything that is hashable, then export it to lib
 // TODO: Add translation back using a Vec
@@ -61,6 +64,10 @@ impl FlexibleGraph {
         self.neighbors.len()
     }
 
+    pub fn number_of_edges(&self) -> usize {
+        self.edges.len()
+    }
+
     pub fn add_undirected(&mut self, u: usize, v: usize) {
         let edge_id = self.edges.len();
 
@@ -72,7 +79,6 @@ impl FlexibleGraph {
 }
 
 struct DfsSpecial<'a> {
-    dictionary: &'a Dictionary<'a>,
     graph: &'a FlexibleGraph,
     low: Vec<i32>,
     disc: Vec<i32>,
@@ -82,13 +88,12 @@ struct DfsSpecial<'a> {
 }
 
 impl<'a> DfsSpecial<'a> {
-    pub fn new(graph: &'a FlexibleGraph, dictionary: &'a Dictionary<'a>) -> Self {
+    pub fn new(graph: &'a FlexibleGraph, ignore: [usize; 2]) -> Self {
         let n = graph.number_of_vertices();
         Self {
             graph,
-            dictionary,
+            ignore,
 
-            ignore: [0, 0],
             ans: None,
             disc: vec![-1; n],
             low: vec![-1; n],
@@ -101,11 +106,6 @@ impl<'a> DfsSpecial<'a> {
         self.disc.fill(-1);
         self.low.fill(-1);
         self.time = 0;
-    }
-
-    fn edge(&self, i: usize) -> String {
-        let [u, v] = self.graph.edges[i];
-        format!("{} - {}", self.dictionary.rev(u), self.dictionary.rev(v))
     }
 
     fn dfs(&mut self, u: usize, p: usize) {
@@ -122,10 +122,6 @@ impl<'a> DfsSpecial<'a> {
                     // It's assuming that there is only one bridge
                     let subtree_size = self.time - before_time;
                     let other_size = self.graph.number_of_vertices() - subtree_size;
-
-                    // println!("{subtree_size} x {other_size} time={} disc[{}]={} [{}, {}, {}]",
-                    //     self.time, u, self.disc[u],
-                    //      self.edge(self.ignore[0]), self.edge(self.ignore[1]), self.edge(*ei));
                     self.ans = Some(subtree_size * other_size);
                 }
                 self.low[u] = min(self.low[u], self.low[v]);
@@ -135,14 +131,10 @@ impl<'a> DfsSpecial<'a> {
         }
     }
     pub fn solve(&mut self) -> Option<usize> {
-        let mut sizes = vec![];
         for u in 0..self.graph.number_of_vertices() {
             if self.disc[u] == -1 {
-                sizes.push(self.dfs(u, u));
+                self.dfs(u, u);
             }
-        }
-        if self.ans.is_some() {
-            println!("Sizes={}", sizes.len());
         }
         self.ans
     }
@@ -163,19 +155,26 @@ pub fn run(content: &str) -> usize {
     // LOCK IT IN
     let graph = graph;
 
-    let mut dfs = DfsSpecial::new(&graph, &dict);
     println!("N={} E={}", graph.number_of_vertices(), graph.edges.len());
 
-    for i in 0..graph.edges.len() {
-        println!("i={i}");
-        for j in 0..i {
-            dfs.reset([i, j]);
-            if let Some(ans) = dfs.solve() {
-                return ans
-            }
-        }
-    }
-    panic!()
+    let m = graph.number_of_edges();
+    let iter: Vec<(usize, usize)> = (0..m).flat_map(|i| (0..i).map(move |j| (i, j))).collect();
+
+    let cnt = Arc::new(Mutex::new(0usize));
+    let ans: Vec<_> = iter.par_iter().flat_map(|(i, j)| {
+        // let c = cnt.lock();
+        // *c.unwrap().deref_mut() += 1;
+        // println!("c={}", *c.unwrap().deref());
+        // drop(c);
+        // println!("{i},{j}");
+        let mut dfs = DfsSpecial::new(&graph, [*i, *j]);
+        dfs.solve()
+    }).collect();
+
+    // i=2517  didnt work
+
+
+    ans[0]
 }
 
 #[cfg(test)]
