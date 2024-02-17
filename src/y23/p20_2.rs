@@ -1,7 +1,7 @@
+use std::collections::{HashMap, VecDeque};
 use crate::utils::dict::Dictionary;
 use crate::utils::graph::FlexibleGraph;
 use crate::utils::vec::ElasticVector;
-use std::collections::{HashMap, VecDeque};
 
 const N: u32 = 1000;
 
@@ -38,6 +38,7 @@ enum ModuleType {
     NONE,
 }
 
+
 pub fn run(content: &str) -> u32 {
     let dict = Dictionary::new();
     let mut graph = FlexibleGraph::new();
@@ -54,14 +55,11 @@ pub fn run(content: &str) -> u32 {
             broadcast_id = id;
         } else {
             id = dict.id(&token[1..]);
-            modules.set(
-                id,
-                match &token[..1] {
-                    "&" => ModuleType::CONJ(Memory::default()),
-                    "%" => ModuleType::FLIP(false),
-                    _ => panic!("Should not happen even though we have NONE type"),
-                },
-            );
+            modules.set(id, match &token[..1] {
+                "&" => ModuleType::CONJ(Memory::default()),
+                "%" => ModuleType::FLIP(false),
+                _ => panic!("Should not happen even though we have NONE type")
+            });
         }
 
         let token = it.next().unwrap();
@@ -72,7 +70,6 @@ pub fn run(content: &str) -> u32 {
 
     // Ensure for all
     modules.set(graph.number_of_vertices(), Default::default());
-
     for u in 0..graph.number_of_vertices() {
         for v in &graph.neighbors[u] {
             if let ModuleType::CONJ(ref mut mem) = modules.get_mut(*v) {
@@ -81,14 +78,29 @@ pub fn run(content: &str) -> u32 {
         }
     }
 
+    let rx = dict.id("rx");
+
+    println!("N={}", graph.number_of_vertices());
+    for u in 0..graph.number_of_vertices() {
+        print!("u={u} ");
+        match modules.get(u) {
+            ModuleType::NONE => println!("NONE"),
+            ModuleType::CONJ(mem) => println!("MEM {}", mem.map.len()),
+            ModuleType::FLIP(_) => println!("FLIP"),
+        }
+    }
     let mut pulse_count = [0; 2];
-    for it in 0..N {
+    let mut it = 0;
+    loop {
+        it += 1;
+        // println!("it={}", it);
         let mut q = VecDeque::new();
         q.push_back((broadcast_id, false));
 
         // The low pulse to broadcast
         pulse_count[0] += 1;
 
+        let mut done = false;
         while let Some((from, pulse)) = q.pop_front() {
             for &to in &graph.neighbors[from] {
                 pulse_count[if pulse { 1 } else { 0 }] += 1;
@@ -105,20 +117,22 @@ pub fn run(content: &str) -> u32 {
                         }
                     }
                     ModuleType::NONE => {
-                        // Nothing ...
+                        done |= to == rx && pulse == false;
                     }
                 }
             }
         }
+        if done {
+            break;
+        }
     }
-    println!("{} {}", pulse_count[0], pulse_count[1]);
-    pulse_count.iter().product()
+    it
 }
 
 #[cfg(test)]
 mod test {
-    use crate::y23::p20::run;
     use std::fs::read_to_string;
+    use super::run;
 
     #[test]
     pub fn test_example1() {

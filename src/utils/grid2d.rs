@@ -20,13 +20,18 @@ impl Direction {
             'D' => Direction::DOWN,
             'R' => Direction::RIGHT,
             'L' => Direction::LEFT,
-            c => Err(eyre!("{} not a direction", c))?
+            c => Err(eyre!("{} not a direction", c))?,
         })
     }
 }
 
 // Dirs in random orders
-pub const ALL_4_DIRS: [Direction; 4] = [Direction::LEFT, Direction::RIGHT, Direction::UP, Direction::DOWN];
+pub const ALL_4_DIRS: [Direction; 4] = [
+    Direction::LEFT,
+    Direction::RIGHT,
+    Direction::UP,
+    Direction::DOWN,
+];
 
 impl Direction {
     pub fn opposite(self: &Self) -> Self {
@@ -55,7 +60,7 @@ impl GridCell {
 
     // Up, down, left, right neighbors
     // TODO: Remove '_ and check why it's needed
-    pub fn neighbors4(&self) -> impl Iterator<Item=GridCell> + '_ {
+    pub fn neighbors4(&self) -> impl Iterator<Item = GridCell> + '_ {
         ALL_4_DIRS.iter().map(|d: &Direction| self.step_once(*d))
     }
 
@@ -83,7 +88,10 @@ impl GridCell {
 
     pub fn step(&self, dir: Direction, n: i32) -> GridCell {
         let (dx, dy) = GridCell::dirs(dir);
-        GridCell { x: self.x + dx * n, y: self.y + dy * n }
+        GridCell {
+            x: self.x + dx * n,
+            y: self.y + dy * n,
+        }
     }
 
     pub fn step_once(&self, dir: Direction) -> GridCell {
