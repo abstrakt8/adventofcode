@@ -64,7 +64,7 @@ fn find_first_digit(input: &str, reversed: bool) -> u32 {
 }
 
 pub fn run() {
-    let contents = fs::read_to_string("1.in")
+    let contents = fs::read_to_string("../../inputs/y23/1.in")
         .expect("Should have been able to read the file");
 
     let ferris: u32 = contents.lines().map(|l| calibration_value(&l)).sum();

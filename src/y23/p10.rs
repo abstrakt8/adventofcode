@@ -36,7 +36,6 @@ pub fn dirs() -> HashMap<char, [[i32; 2]; 2]> {
     map
 }
 
-
 pub fn run(content: &str) -> i32 {
     let grid = content
         .lines()
@@ -62,26 +61,25 @@ pub fn run(content: &str) -> i32 {
     let in_grid = |x: i32, y: i32| x >= 0 && x < n && y >= 0 && y < m;
     let neighbors = |x, y| {
         let it = directions.get(&grid[x as usize][y as usize]);
-        let it = it
-            .map(move |dirs|
-                dirs
-                    .iter()
-                    .map(move |[dx, dy]| [x + dx, y + dy])
-                    .filter(move |[nx, ny]| in_grid(*nx, *ny))
-            );
+        let it = it.map(move |dirs| {
+            dirs.iter()
+                .map(move |[dx, dy]| [x + dx, y + dy])
+                .filter(move |[nx, ny]| in_grid(*nx, *ny))
+        });
 
         it
     };
     println!("Starting position = {sx},{sy}");
     let mut ans = 0;
 
-    let mut check = |x: i32, y: i32, d: i32, q: &mut VecDeque<_>, dist:  &mut HashMap<(i32, i32), i32> | {
-        if !dist.contains_key(&(x, y)) {
-            dist.insert((x, y), d);
-            q.push_back([x, y]);
-            ans = max(ans, d);
-        }
-    };
+    let mut check =
+        |x: i32, y: i32, d: i32, q: &mut VecDeque<_>, dist: &mut HashMap<(i32, i32), i32>| {
+            if !dist.contains_key(&(x, y)) {
+                dist.insert((x, y), d);
+                q.push_back([x, y]);
+                ans = max(ans, d);
+            }
+        };
 
     for [dx, dy] in [[0, 1], [-1, 0], [1, 0], [0, -1]] {
         let (nx, ny) = (sx + dx, sy + dy);

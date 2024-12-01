@@ -59,7 +59,7 @@ fn game_power_value(input: &str) -> i32 {
 }
 
 pub fn solve() {
-    let contents = fs::read_to_string("2.in")
+    let contents = fs::read_to_string("../../inputs/y23/2.in")
         .expect("Should have been able to read the file");
 
     let ans1: i32 = contents.lines().map(|l| game_id_value(&l)).sum();

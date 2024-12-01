@@ -2,7 +2,7 @@ use std::cmp::min;
 use std::fs;
 
 pub(crate) fn solve() {
-    let contents = fs::read_to_string("4.in")
+    let contents = fs::read_to_string("../../inputs/y23/4.in")
         .expect("Should have been able to read the file");
     let ans1 = process1(&contents);
     println!("{:}", ans1);

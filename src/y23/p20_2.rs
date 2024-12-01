@@ -158,7 +158,7 @@ mod test {
     #[ignore] // Too slow for automated tests
     #[test]
     pub fn test_input() -> color_eyre::Result<()> {
-        let str = read_to_string("20.in")?;
+        let str = read_to_string("../../inputs/y23/20.in")?;
         println!("{}", run(&str));
         Ok(())
     }

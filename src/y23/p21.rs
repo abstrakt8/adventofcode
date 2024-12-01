@@ -15,7 +15,6 @@ fn run(content: &str, required_steps: usize) -> u32 {
     let (rows, cols) = (grid.len() as i32, grid[0].len() as i32);
     let mut set = HashSet::new();
 
-
     let starting_cell = 'outer: loop {
         for (i, row) in grid.iter().enumerate() {
             for (j, cell) in row.iter().enumerate() {
@@ -31,6 +30,7 @@ fn run(content: &str, required_steps: usize) -> u32 {
     println!("{:?}", starting_cell);
 
     let mut q = VecDeque::new();
+    let mut c = 3;
 
     let mut try_add = |node: Node, set: &mut HashSet<Node>, q: &mut VecDeque<Node>| {
         if set.insert(node.clone()) {
@@ -93,7 +93,7 @@ mod test {
     }
     #[test]
     pub fn test_input() {
-        let content = fs::read_to_string("21.in").expect("Should have been able to read the file");
+        let content = fs::read_to_string("../../inputs/y23/21.in").expect("Should have been able to read the file");
         let ans = run(&content, 64);
         assert_eq!(ans, 3);
     }

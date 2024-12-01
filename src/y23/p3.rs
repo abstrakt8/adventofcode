@@ -92,7 +92,7 @@ fn process2(grid_str: &str) -> u32 {
 }
 
 pub fn solve() {
-    let contents = fs::read_to_string("3.in")
+    let contents = fs::read_to_string("../../inputs/y23/3.in")
         .expect("Should have been able to read the file");
     let ans1 = process1(&contents);
     println!("{:}", ans1);

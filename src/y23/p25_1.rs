@@ -131,7 +131,7 @@ frs: qnr lhk lsr"##;
     #[ignore] // Too slow for automated tests
     #[test]
     pub fn test_input() -> Result<()> {
-        let str = read_to_string("25.in")?;
+        let str = read_to_string("../../inputs/y23/25.in")?;
         let ans = run(&str);
         assert_eq!(580800, ans);
         Ok(())
