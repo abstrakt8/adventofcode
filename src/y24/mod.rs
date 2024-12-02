@@ -5,3 +5,4 @@ mod p1_trie_unsafe_accesses;
 mod p1_numbers;
 pub mod p2;
 pub mod p2_dp;
+mod p2_hyper_optimised;
