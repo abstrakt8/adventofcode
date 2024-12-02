@@ -21,50 +21,60 @@ pub fn run_1(content: &str) -> u32 {
     res
 }
 
+
+// Bitmask represents whether it's still possible to keep the sequence increasing / decreasing if the bit is on
+const INCREASING: u8 = 1 << 0;
+const DECREASING: u8 = 1 << 1;
+const ALL: u8 = INCREASING | DECREASING;
+const JOKER: i32 = -1;
+const CAT: i32 = -2;
+
 #[inline(always)]
-fn bit(a: u32, b: u32) -> u8 {
-    if a == b || a.abs_diff(b) > 3 {
+fn bit(a: i32, b: i32) -> u8 {
+    if !(1..=3).contains(&(a - b).abs()) {
         0
     } else if a < b {
-        1
+        INCREASING
     } else {
-        2
+        DECREASING
     }
 }
 
-// i < j
 #[inline(always)]
-fn bitcoin(i: usize, j: usize, v: &[u32]) -> u8 {
-    if i == 0 || v.len() < j {
-        3
+fn bitcoin(a: i32, b: i32) -> u8 {
+    if a == JOKER || b == JOKER {
+        ALL
     } else {
-        bit(v[i - 1], v[j - 1])
+        bit(a, b)
     }
 }
 
 pub fn run(content: &str) -> u32 {
+    // a = i - 2, 0
+    // b = i - 1, 0
+    // c = i - 1, 1
     let res: u32 = content.lines().map(|line| {
-        let v: Vec<u32> = line.split_whitespace()
-            .map(|x| x.parse::<u32>().unwrap())
-            .collect();
-        let n = v.len();
-
-        // dp[i][k] = Whether subarray [0..i] is safe if we can skip k elements
-        let mut dp: Vec<[u8; 2]> = vec![[3, 3]; n + 2];
-
-        for i in 1..=n + 1 {
-            // Don't skip
-            dp[i][0] = dp[i - 1][0] & bitcoin(i - 1, i, &v);
-
-            let mut foo =  dp[i - 1][1] & bitcoin(i - 1, i, &v);
-            // Skip if possible
-            if i >= 2 {
-                foo |= dp[i - 2][0] & bitcoin(i - 2, i, &v);
+        let mut a: u8 = ALL;
+        let mut b: u8 = ALL;
+        let mut c: u8 = ALL;
+        let mut prev_prev: i32 = CAT;
+        let mut prev: i32 = JOKER;
+        let it = line.split_ascii_whitespace()
+            .map(|x| x.parse::<i32>().unwrap());
+        for cur in it.chain([JOKER]) {
+            c &= bitcoin(prev, cur);
+            if prev_prev != CAT {
+                c |= bitcoin(prev_prev, cur) & a;
             }
-            dp[i][1] = foo;
+            a = b;
+            b &= bitcoin(prev, cur);
+            if c | a == 0 {
+                break;
+            }
+            [prev_prev, prev] = [prev, cur];
         }
-        // Skipping at least one is always better (you can skip the first element for example)
-        let res  = (dp[n + 1][1] != 0) as u32;
+        let res = (c != 0) as u32;
+        // println!("{line} {res}");
         res
     }).sum();
     // 536
