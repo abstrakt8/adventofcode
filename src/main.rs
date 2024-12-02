@@ -5,8 +5,9 @@ use adventofcode::y24;
 
 pub fn main() -> Result<()> {
     color_eyre::install()?;
-    let str = read_to_string("./inputs/y24/1.in")?;
-    println!("ANS {}", y24::p1::run(&str));
+    let str = read_to_string("./inputs/y24/2.in")?;
+    // let str = read_to_string("./inputs/y24/2_example.in")?;
+    println!("ANS {}", y24::p2::run(&str));
 
     Ok(())
 }
