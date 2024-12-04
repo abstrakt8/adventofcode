@@ -1,7 +1,7 @@
 
 use std::fs::read_to_string;
 use color_eyre::Result;
-use adventofcode::y24::p4::run;
+use adventofcode::y24::p4_rayon::run;
 
 pub fn main() -> Result<()> {
     color_eyre::install()?;

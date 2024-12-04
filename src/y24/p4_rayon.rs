@@ -1,6 +1,9 @@
 // .XMASAMX
 // 01234567
 use rayon::prelude::*;
+use itertools::Itertools;
+use rayon::iter::walk_tree;
+
 use std::iter;
 #[inline(always)]
 pub fn go(state: &mut u8, next: u8, cnt: &mut u32) {
@@ -29,7 +32,6 @@ pub fn go(state: &mut u8, next: u8, cnt: &mut u32) {
 pub fn run1(content: &str) -> u32 {
     let n = content.lines().count() as i32;
     let m = content.lines().next().map_or(0, |line| line.len()) as i32;
-    // let m = n;
 
     let rows = (0..n).map(|i| (i, 0i32, 0i32, 1i32));
     let cols = (0..m).map(|j| (0, j, 1, 0));
@@ -63,46 +65,36 @@ pub fn run1(content: &str) -> u32 {
 
 
 pub fn run2(content: &str) -> u32 {
-    let g: Vec<Vec<char>> = content.lines().map(|line| line.chars().collect()).collect();
+    let n = content.lines().count() as i32;
+    let m = content.lines().next().map_or(0, |line| line.len()) as i32;
+    let bytes = content.as_bytes();
 
-    let matches2 = |i: usize, j: usize, c1: char, c2: char| -> u32 {
-        if i >= 1 && i <= g.len() && j >= 1 && j <= g[i - 1].len() {
-            let c = g[i - 1][j - 1];
-            if c == c1 {
-                1
-            } else if c == c2 {
-                2
-            } else {
-                0
-            }
-        } else {
-            0
-        }
-    };
-    let matches = |i: usize, j: usize, c: char| -> u32 {
-        matches2(i, j, c, c)
+    let get = |i: usize, j: usize| -> u8 {
+        bytes[i * (m as usize + 1) + j]
     };
 
-    let mut ans = 0;
-    for i in 1..=g.len() {
-        for j in 1..=g.len() {
-            if matches(i, j, 'A') == 0 {
-                continue;
-            }
-            if matches2(i - 1, j - 1, 'M', 'S') + matches2(i + 1, j + 1, 'M', 'S') == 3 &&
-                matches2(i - 1, j + 1, 'M', 'S') + matches2(i + 1, j - 1, 'M', 'S') == 3 {
-                ans += 1;
-            }
+    let bit = |i: usize, j: usize| -> u32 {
+        match get(i, j) {
+            b'M' => 1,
+            b'S' => 2,
+            _ => 0
         }
-    }
+    };
 
-    // 1985
-    ans
+    let ok = |i, j| -> u32 {
+        (get(i, j) == b'A' &&
+            (bit(i - 1, j - 1) | bit(i + 1, j + 1)) == 3 &&  //
+            (bit(i - 1, j + 1) | bit(i + 1, j - 1)) == 3) as u32
+    };
+
+
+    // Assuming we have access to 'n' and 'm' from the previous context
+    (1..n - 1).cartesian_product(1..m - 1).map(|(i, j)| ok(i as usize, j as usize)).sum()
 }
 
 
 pub fn run(content: &str) -> u32 {
-    run1(content)
+    run2(content)
     // 1: 2551
     // 2: 1985
 }
