@@ -9,3 +9,4 @@ mod p2_hyper_optimised;
 pub mod p3;
 mod p3_regex;
 pub mod p4_rayon;
+mod p4_rayon_lookup_table;
