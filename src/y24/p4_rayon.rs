@@ -88,8 +88,14 @@ pub fn run2(content: &str) -> u32 {
     };
 
 
-    // Assuming we have access to 'n' and 'm' from the previous context
-    (1..n - 1).cartesian_product(1..m - 1).map(|(i, j)| ok(i as usize, j as usize)).sum()
+    // This is slower than expected, but probably because too many threads are spawned
+    // (1..n - 1).cartesian_product(1..m - 1).par_bridge().map(|(i, j)| ok(i as usize, j as usize)).sum()
+
+    let return_value = (1..n - 1).into_par_iter()
+        .map(|i| {
+            (1..m - 1).map(|j| ok(i as usize, j as usize)).sum::<u32>()
+        }).sum();
+    return_value
 }
 
 
