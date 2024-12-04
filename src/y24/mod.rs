@@ -6,3 +6,6 @@ mod p1_numbers;
 pub mod p2;
 pub mod p2_dp;
 mod p2_hyper_optimised;
+pub mod p3;
+mod p3_regex;
+pub mod p4;
