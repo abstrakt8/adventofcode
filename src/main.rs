@@ -1,15 +1,15 @@
 
 use std::fs::read_to_string;
 use color_eyre::Result;
-use adventofcode::y24::p4_rayon_lookup_table::run;
+use adventofcode::y24::p5::run;
 
 pub fn main() -> Result<()> {
     color_eyre::install()?;
     // println!("ANS {}", y24::p2_dp::run(&str));
-    let str = read_to_string("./inputs/y24/4_example.in")?;
+    let str = read_to_string("./inputs/y24/5_example.in")?;
     println!("Example {}", run(&str));
 
-    let str = read_to_string("./inputs/y24/4.in")?;
+    let str = read_to_string("./inputs/y24/5.in")?;
     println!("Output {}", run(&str));
 
     // Day 3
