@@ -34,17 +34,11 @@ pub fn run1(content: &str) -> u32 {
         for i in 0..vec.len() {
             for j in i + 1..vec.len() {
                 if contains(vec[j], vec[i]) {
-                    vec.sort_unstable_by(|x, y| if contains(*x, *y) {
-                        Less
-                    } else {
-                        Equal
-                    });
-                    return vec[vec.len()/2];
+                    return 0;
                 }
             }
         }
-        return 0;
-        // return vec[vec.len() / 2];
+        return vec[vec.len() / 2];
     }).sum()
     // 6304
     // 6305
@@ -87,7 +81,7 @@ pub fn run2(content: &str) -> u32 {
                     } else {
                         Equal
                     });
-                    return vec[vec.len()/2];
+                    return vec[vec.len() / 2];
                 }
             }
         }
@@ -99,5 +93,5 @@ pub fn run2(content: &str) -> u32 {
 pub fn run(content: &str) -> u32 {
     // 6304
     // 6305
-    run2(content)
+    run1(content)
 }
