@@ -11,3 +11,4 @@ pub mod p3_regex;
 pub mod p4_rayon;
 pub mod p4_rayon_lookup_table;
 pub mod p5;
+pub mod p5_naive;

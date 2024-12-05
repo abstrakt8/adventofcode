@@ -17,6 +17,7 @@ enum-map = "2.7.3"
 color-eyre = "0.6.2"
 rayon = "1.10.0"
 memchr = "2.7.4"
+bitvec = "1.0.1"
 
 [dev-dependencies]
 rstest = "0.18.2"
@@ -24,4 +25,8 @@ divan = "0.1.16"
 
 [[bench]]
 name = "y24_p4"
+harness = false
+
+[[bench]]
+name = "y24_p5"
 harness = false
