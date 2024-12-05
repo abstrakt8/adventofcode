@@ -29,7 +29,7 @@ pub fn run1(content: &str) -> u32 {
         bset[(x * 1000 + y) as usize]
     };
 
-    input.lines().map(|line| {
+    input.par_lines().map(|line| {
         let mut vec: Vec<u32> = line.split(",").map(|x| x.parse().unwrap()).collect();
         for i in 0..vec.len() {
             for j in i + 1..vec.len() {
@@ -71,7 +71,7 @@ pub fn run2(content: &str) -> u32 {
         bset[(x * 1000 + y) as usize]
     };
 
-    input.lines().map(|line| {
+    input.par_lines().map(|line| {
         let mut vec: Vec<u32> = line.split(",").map(|x| x.parse().unwrap()).collect();
         for i in 0..vec.len() {
             for j in i + 1..vec.len() {
