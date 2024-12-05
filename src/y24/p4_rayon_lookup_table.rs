@@ -2,31 +2,51 @@
 // 01234567
 use rayon::prelude::*;
 
+use memchr::memchr_iter;
 use std::iter;
+
 const STATE_COUNT: usize = 7;
-const CHAR_COUNT: usize = 256; // Covers all possible byte values
+const CHAR_COUNT: usize = 4; // Only X, M, A, S
+
+const fn init_char_to_index() -> [usize; 256] {
+    let mut table = [3usize; 256]; // Default all to 3 (index for 'S' and others)
+    table[b'X' as usize] = 0;
+    table[b'M' as usize] = 1;
+    table[b'A' as usize] = 2;
+    table
+}
+
+static CHAR_TO_INDEX: [usize; 256] = init_char_to_index();
+
+#[inline(always)]
+fn char_to_index(ch: u8) -> usize {
+    CHAR_TO_INDEX[ch as usize]
+}
+
 
 const fn init_next_state() -> [u8; STATE_COUNT * CHAR_COUNT] {
     let mut matrix = [0u8; STATE_COUNT * CHAR_COUNT];
-    let mut i = 0;
-    while i < STATE_COUNT * CHAR_COUNT {
-        let state = i / CHAR_COUNT;
-        let ch = (i % CHAR_COUNT) as u8;
-        matrix[i] = match ch {
-            b'X' => 1,
-            b'S' => 4,
-            _ => 0,
-        };
-        i += 1;
+    let mut state = 0;
+    while state < STATE_COUNT {
+        let mut char_index = 0;
+        while char_index < CHAR_COUNT {
+            matrix[state * CHAR_COUNT + char_index] = match char_index {
+                0 => 1, // 'X'
+                3 => 4, // 'S'
+                _ => 0,
+            };
+            char_index += 1;
+        }
+        state += 1;
     }
 
     // Set specific transitions
-    matrix[1 * CHAR_COUNT + b'M' as usize] = 2;
-    matrix[2 * CHAR_COUNT + b'A' as usize] = 3;
-    matrix[3 * CHAR_COUNT + b'S' as usize] = 4;
-    matrix[4 * CHAR_COUNT + b'A' as usize] = 5;
-    matrix[5 * CHAR_COUNT + b'M' as usize] = 6;
-    matrix[6 * CHAR_COUNT + b'X' as usize] = 1;
+    matrix[1 * CHAR_COUNT + 1] = 2; // 'M'
+    matrix[2 * CHAR_COUNT + 2] = 3; // 'A'
+    matrix[3 * CHAR_COUNT + 3] = 4; // 'S'
+    matrix[4 * CHAR_COUNT + 2] = 5; // 'A'
+    matrix[5 * CHAR_COUNT + 1] = 6; // 'M'
+    matrix[6 * CHAR_COUNT + 0] = 1; // 'X'
 
     matrix
 }
@@ -35,8 +55,8 @@ const fn init_count_increment() -> [u8; STATE_COUNT * CHAR_COUNT] {
     let mut matrix = [0u8; STATE_COUNT * CHAR_COUNT];
 
     // Set count increments
-    matrix[3 * CHAR_COUNT + b'S' as usize] = 1;
-    matrix[6 * CHAR_COUNT + b'X' as usize] = 1;
+    matrix[3 * CHAR_COUNT + 3] = 1; // 'S'
+    matrix[6 * CHAR_COUNT + 0] = 1; // 'X'
 
     matrix
 }
@@ -46,7 +66,8 @@ static COUNT_INCREMENT: [u8; STATE_COUNT * CHAR_COUNT] = init_count_increment();
 
 #[inline(always)]
 pub fn go(state: &mut u8, next: u8, cnt: &mut u32) {
-    let index = (*state as usize) * CHAR_COUNT + (next as usize);
+    let char_index = char_to_index(next);
+    let index = (*state as usize) * CHAR_COUNT + char_index;
     *cnt += COUNT_INCREMENT[index] as u32;
     *state = NEXT_STATE[index];
 }
@@ -121,9 +142,57 @@ pub fn run2(content: &str) -> u32 {
     return_value
 }
 
+pub fn run2_4threads(content: &str) -> u32 {
+    let n = content.lines().count() as i32;
+    let m = content.lines().next().map_or(0, |line| line.len()) as i32;
+    let bytes = content.as_bytes();
 
+    let get = |i: usize, j: usize| -> u8 {
+        bytes[i * (m as usize + 1) + j]
+    };
+
+    let bit = |i: i32, j: i32| -> u32 {
+        if i >= 0 && i < n && j >= 0 && j < m {
+            match get(i as usize, j as usize) {
+                b'M' => 1,
+                b'S' => 2,
+                _ => 0
+            }
+        } else {
+            0
+        }
+    };
+
+    let xmas = |i, j| -> u32 {
+        ((bit(i - 1, j - 1) | bit(i + 1, j + 1)) == 3 &&  //
+            (bit(i - 1, j + 1) | bit(i + 1, j - 1)) == 3) as u32
+    };
+
+
+    // This is slower than expected, but probably because too many threads are spawned
+    // (1..n - 1).cartesian_product(1..m - 1).par_bridge().map(|(i, j)| ok(i as usize, j as usize)).sum()
+
+    let a = bytes.len();
+    let c = (a + 3) / 4;
+
+    let ans = [0..c, c..2 * c, 2 * c..3 * c, 3 * c..bytes.len()]
+        .into_par_iter()
+        .map(|range| {
+            let chunk = &bytes[range.start..range.end];
+            let mut ans = 0;
+            for it in memchr_iter(b'A', chunk) {
+                let x = range.start as i32 + it as i32;
+                let i = x / (m + 1);
+                let j = x % (m + 1);
+                ans += xmas(i, j);
+            }
+            ans
+        }).sum();
+    ans
+}
+
+// 1: 2551
+// 2: 1985
 pub fn run(content: &str) -> u32 {
-    run1(content)
-    // 1: 2551
-    // 2: 1985
+    run2_4threads(content)
 }

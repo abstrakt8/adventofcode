@@ -11,7 +11,7 @@ pub(crate) fn solve() {
     println!("{:}", ans2);
 }
 
-// For /bench
+// For /benches
 fn run(input: &str) -> u32 {
     process2(input)
 }

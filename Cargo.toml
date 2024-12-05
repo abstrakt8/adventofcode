@@ -16,6 +16,12 @@ serde = { version = "1.0.196", features = ["derive"] }
 enum-map = "2.7.3"
 color-eyre = "0.6.2"
 rayon = "1.10.0"
+memchr = "2.7.4"
 
 [dev-dependencies]
 rstest = "0.18.2"
+divan = "0.1.16"
+
+[[bench]]
+name = "y24_p4"
+harness = false
