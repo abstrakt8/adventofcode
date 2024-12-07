@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet, VecDeque};
-use enum_map::{Enum, enum_map, EnumMap};
+use enum_map::{enum_map, Enum, EnumMap};
 use lazy_static::lazy_static;
+use std::collections::{HashMap, HashSet, VecDeque};
 
 #[derive(Hash, Eq, PartialEq, Debug, Enum, Clone, Copy)]
 pub enum Direction {

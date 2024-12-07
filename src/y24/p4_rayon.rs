@@ -1,8 +1,6 @@
 // .XMASAMX
 // 01234567
 use rayon::prelude::*;
-use itertools::Itertools;
-use rayon::iter::walk_tree;
 
 use std::iter;
 #[inline(always)]

@@ -1,9 +1,9 @@
+use itertools::Itertools;
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 use std::fmt::Display;
 use std::hash::Hash;
 use std::str::FromStr;
-use itertools::Itertools;
 
 const ROCK: char = '#';
 const BALL: char = 'O';

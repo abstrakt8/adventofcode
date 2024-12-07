@@ -1,9 +1,9 @@
+use num::integer::{gcd, lcm};
 use std::collections::{HashMap, HashSet};
 use std::panic::panic_any;
-use num::integer::{gcd, lcm};
 
-use regex::Regex;
 use log::debug;
+use regex::Regex;
 
 type NodeID = u16;
 

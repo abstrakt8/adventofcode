@@ -72,7 +72,7 @@ pub fn solve() {
 
 #[cfg(test)]
 mod tests {
-    use super::{is_solvable, parse_game_id, parse_rgb, game_id_value, power_value};
+    use super::{game_id_value, is_solvable, parse_game_id, parse_rgb, power_value};
 
     #[test]
     fn test() {

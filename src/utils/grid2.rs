@@ -1,9 +1,9 @@
-use std::hash::Hash;
-use std::io::BufRead;
-use std::iter;
 use color_eyre::eyre::OptionExt;
 use color_eyre::Result;
 use itertools::Itertools;
+use std::hash::Hash;
+use std::io::BufRead;
+use std::iter;
 // Graph can be anything like Grid, Nodes+Edges, ...
 // Algorithms can be run on the graph, but they should just share the trait
 

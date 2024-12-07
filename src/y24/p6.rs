@@ -1,8 +1,7 @@
-use std::cell::RefCell;
-use std::sync::Mutex;
-use memchr::memchr;
 use bitvec::prelude::*;
+use memchr::memchr;
 use rayon::prelude::*;
+use std::sync::Mutex;
 
 const DIRECTIONS: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
 enum State {

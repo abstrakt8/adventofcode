@@ -1,5 +1,5 @@
-use std::iter::{once, repeat};
 use itertools::Itertools;
+use std::iter::{once, repeat};
 
 const N: usize = 5;
 

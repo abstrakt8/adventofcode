@@ -1,7 +1,7 @@
-use std::collections::{HashMap, VecDeque};
 use crate::utils::dict::Dictionary;
 use crate::utils::graph::FlexibleGraph;
 use crate::utils::vec::ElasticVector;
+use std::collections::{HashMap, VecDeque};
 
 const N: u32 = 1000;
 
@@ -131,8 +131,8 @@ pub fn run(content: &str) -> u32 {
 
 #[cfg(test)]
 mod test {
-    use std::fs::read_to_string;
     use super::run;
+    use std::fs::read_to_string;
 
     #[test]
     pub fn test_example1() {

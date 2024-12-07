@@ -1,5 +1,3 @@
-use std::cmp::{max, min};
-
 pub fn run_1(content: &str) -> u32 {
     let res: u32 = content.lines().map(|line| {
         let v: Vec<u32> = line.split_whitespace()

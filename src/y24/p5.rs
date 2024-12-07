@@ -1,6 +1,6 @@
-use std::cmp::Ordering::{Equal, Less};
 use bitvec::prelude::*;
 use rayon::prelude::*;
+use std::cmp::Ordering::{Equal, Less};
 
 pub fn run1(content: &str) -> u32 {
     let mut it = content.split("\n\n").into_iter();

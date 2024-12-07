@@ -1,8 +1,8 @@
+use itertools;
+use itertools::Itertools;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::str::FromStr;
-use itertools;
-use itertools::Itertools;
 
 type Part = [i32; 4];
 
@@ -210,8 +210,7 @@ pub fn run(content: &str) -> i64 {
 
 #[cfg(test)]
 mod test {
-    use std::cmp::Ordering::Greater;
-    use super::{run, parse_rule, parse_xmas, parse_workflow, Rule, Workflow};
+    use super::{parse_xmas, run};
 
     #[test]
     pub fn test_example() {

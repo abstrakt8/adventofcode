@@ -1,9 +1,8 @@
-use std::collections;
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::str::FromStr;
-use color_eyre::{Result, Report};
+use crate::utils::grid2d::{Direction, GridCell};
 use color_eyre::owo_colors::OwoColorize;
-use crate::utils::grid2d::{ALL_4_DIRS, Direction, GridCell};
+use color_eyre::{Report, Result};
+use std::collections::{HashMap, VecDeque};
+use std::str::FromStr;
 
 struct Operation {
     dir: Direction,
@@ -120,10 +119,9 @@ fn print(grid: &HashMap<GridCell, i32>, min_cell: &GridCell, max_cell: &GridCell
 
 #[cfg(test)]
 mod test {
-    use crate::y23::p18::{Operation, run};
-    use color_eyre::*;
-    use color_eyre::eyre::eyre;
     use crate::utils::grid2d::Direction;
+    use crate::y23::p18::{run, Operation};
+    use color_eyre::*;
 
     pub fn setup() {
         color_eyre::install().unwrap();

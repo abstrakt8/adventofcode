@@ -1,5 +1,3 @@
-use std::cell::RefCell;
-
 type Grid = Vec<Vec<char>>;
 
 fn check_horizontal(grid: &Grid) -> Vec<usize> {

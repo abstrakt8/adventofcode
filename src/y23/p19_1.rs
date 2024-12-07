@@ -141,8 +141,8 @@ pub fn run(content: &str) -> i32 {
 
 #[cfg(test)]
 mod test {
+    use super::{parse_rule, parse_workflow, parse_xmas, run, Rule, Workflow};
     use std::cmp::Ordering::Greater;
-    use super::{run, parse_rule, parse_xmas, parse_workflow, Rule, Workflow};
 
     #[test]
     pub fn test_example() {

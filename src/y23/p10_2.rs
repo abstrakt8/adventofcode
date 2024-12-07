@@ -1,10 +1,6 @@
+use lazy_static::lazy_static;
 use std::cmp::max;
 use std::collections::{HashMap, VecDeque};
-use std::collections::hash_map::Entry;
-use std::iter;
-use std::iter::empty;
-use std::slice::Iter;
-use lazy_static::lazy_static;
 
 /**
 | is a vertical pipe connecting north and south.

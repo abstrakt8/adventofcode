@@ -1,13 +1,9 @@
-use rayon::prelude::*;
-use std::cell::RefCell;
-use std::cmp::min;
-use std::collections::HashMap;
-use std::iter::repeat;
-use std::ops::{Deref, DerefMut};
-use std::slice::Iter;
-use std::sync::{Arc, Mutex};
 use crate::utils::dict::Dictionary;
 use crate::utils::graph::FlexibleGraph;
+use rayon::prelude::*;
+use std::cmp::min;
+use std::ops::{Deref, DerefMut};
+use std::sync::{Arc, Mutex};
 
 
 struct DfsSpecial<'a> {
@@ -103,10 +99,9 @@ pub fn run(content: &str) -> usize {
 
 #[cfg(test)]
 mod test {
-    use std::fs::read_to_string;
-    use color_eyre::Result;
-    use crate::y23::p25_1;
     use super::run;
+    use color_eyre::Result;
+    use std::fs::read_to_string;
 
     #[test]
     pub fn test_example() {
