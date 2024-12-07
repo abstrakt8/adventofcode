@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 use std::collections::HashSet;
 
-enum Part {
+pub enum Part {
     Part1,
     Part2,
 }
@@ -94,12 +94,11 @@ impl Solver {
         if self.recurse(concat(cur, self.vec[i]), i + 1) {
             return true;
         }
-        //
         false
     }
 }
 
-fn run_part(content: &str, part: Part) -> u64 {
+pub fn run_part(content: &str, part: Part) -> u64 {
     content
         .par_lines()
         .map(|line| {
@@ -121,6 +120,6 @@ fn run_part(content: &str, part: Part) -> u64 {
 }
 
 pub fn run(content: &str) -> u64 {
-    run_part(content, Part::Part1);
+    // run_part(content, Part::Part1);
     run_part(content, Part::Part2)
 }
