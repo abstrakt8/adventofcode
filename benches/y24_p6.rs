@@ -11,7 +11,7 @@ const INPUT: &str = include_str!("../inputs/y24/6.in");
 fn p1() {
     y24::p6::run_part(INPUT, Part1);
 }
-#[divan::bench(sample_count = 10000)]
+#[divan::bench(sample_count = 100)]
 fn p2() {
     y24::p6::run_part(INPUT, Part2);
 }

@@ -1,6 +1,5 @@
 // TODO: Macro to ensure that size is big enough before doing it
 
-use std::cell::RefCell;
 use std::default::Default;
 
 pub struct ElasticVector<T> {
