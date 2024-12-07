@@ -1,21 +1,23 @@
-use adventofcode::y24::p7::run;
+use adventofcode::y22;
 use color_eyre::Result;
 use std::fs::read_to_string;
 
+const YEAR: u32 = 22;
+const DAY: u32 = 1;
+
 pub fn main() -> Result<()> {
     color_eyre::install()?;
-    // println!("ANS {}", y24::p2_dp::run(&str));
-    let str = read_to_string("./inputs/y24/7_example.in")?;
-    println!("Example {}", run(&str));
-
-    let str = read_to_string("./inputs/y24/7.in")?;
-    println!("Output {}", run(&str));
-
-    // Day 3
-    // Example 161
-    // Output 184511516
-
+    let suffixes = ["_example.in", ".in"];
+    suffixes.iter().for_each(|&suffix| {
+        let file_name = format!("./inputs/y{YEAR}/{DAY}{suffix}");
+        let input = read_to_string(&file_name);
+        if let Ok(input) = input {
+            let ans = y22::d1::run(&input);
+            println!("{file_name}: {ans}");
+        } else {
+            println!("Skipped {file_name}");
+        }
+    });
 
     Ok(())
 }
-

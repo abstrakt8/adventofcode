@@ -80,19 +80,19 @@ const DIR_4: [(i32, i32); 4] = [(1, 0), (0, 1), (-1, 0), (0, -1)];
 /// 111
 struct GridNeighbours8;
 
-impl GridNeighbours for GridNeighbours4 {
-    fn grid_neighbours<G: GridGraph>(graph: &G, pos: CellRowCol) -> impl Iterator<Item=CellRowCol> {
-        DIR_4.iter().filter_map(|(dr, dc)| {
-            let nrow = pos.0 as i32 + dr;
-            let ncol = pos.1 as i32 + dc;
-            if graph.contains(nrow, ncol) {
-                Some((nrow, ncol))
-            } else {
-                None
-            }
-        })
-    }
-}
+// impl GridNeighbours for GridNeighbours4 {
+//     fn grid_neighbours<G: GridGraph>(graph: &G, pos: CellRowCol) -> impl Iterator<Item=CellRowCol> {
+//         DIR_4.iter().filter_map(|(dr, dc)| {
+//             let nrow = pos.0 as i32 + dr;
+//             let ncol = pos.1 as i32 + dc;
+//             if graph.contains(nrow, ncol) {
+//                 Some((nrow, ncol))
+//             } else {
+//                 None
+//             }
+//         })
+//     }
+// }
 
 
 impl Graph<CellRowCol> for CharGrid<'_> {
