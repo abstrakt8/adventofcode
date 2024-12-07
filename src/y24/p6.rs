@@ -74,7 +74,6 @@ pub fn run_part(content: &str, part: Part) -> u32 {
         return ans1;
     }
 
-    type BitArrayType = BitArray<[u16; 5625]>;
     // thread_local! {
     //     static BSET: RefCell<BitArrayType> = RefCell::new(bitarr![u16, LocalBits; 0; 150*150*4]);
     // }

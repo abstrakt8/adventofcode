@@ -78,7 +78,7 @@ fn parse_ordering(s: &str) -> Ordering {
     }
 }
 
-pub fn parse_rule(s: &str) -> Option<Rule> {
+fn parse_rule(s: &str) -> Option<Rule> {
     let mut it = s.split(':');
     let fi = it.next().unwrap();
     if let Some(goto) = it.next() {
@@ -98,7 +98,7 @@ pub fn parse_rule(s: &str) -> Option<Rule> {
     }
 }
 
-pub fn parse_workflow(s: &str) -> Workflow {
+fn parse_workflow(s: &str) -> Workflow {
     let mut it = s.split("{");
     let label = it.next().unwrap();
     let mut it = it.next()

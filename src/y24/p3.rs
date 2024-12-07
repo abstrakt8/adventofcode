@@ -1,4 +1,4 @@
-use num::traits::{WrappingAdd, WrappingMul};
+use num::traits::WrappingAdd;
 
 pub fn run(content: &str) -> u32 {
     let bytes = content.as_bytes();

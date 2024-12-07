@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-pub fn run_slow(content: &str) -> i32 {
+pub fn run_slow(content: &str) -> (i32, i32) {
 
     let mut vecs: [Vec<i32>; 2] = Default::default();
     let mut count: HashMap<i32, i32> = Default::default();
@@ -27,5 +27,5 @@ pub fn run_slow(content: &str) -> i32 {
     }
     //3574690
     //22565391
-    ans2
+    (ans1, ans2)
 }

@@ -99,7 +99,7 @@ impl Solver {
     }
 }
 
-pub fn run_part(content: &str, part: Part) -> u64 {
+fn run_part(content: &str, part: Part) -> u64 {
     content
         .par_lines()
         .map(|line| {
@@ -121,5 +121,6 @@ pub fn run_part(content: &str, part: Part) -> u64 {
 }
 
 pub fn run(content: &str) -> u64 {
+    run_part(content, Part::Part1);
     run_part(content, Part::Part2)
 }

@@ -22,8 +22,9 @@ fn bitcoin(a: i32, b: i32) -> u8 {
 }
 
 pub fn run(content: &str) -> u32 {
-    unsafe {
-        content.par_lines().map(|line| {
+    content
+        .par_lines()
+        .map(|line| {
             let mut a: u8 = ALL;
             let mut b: u8 = ALL;
             let mut c: u8 = ALL;
@@ -60,7 +61,6 @@ pub fn run(content: &str) -> u32 {
             }
 
             (c != 0) as u32
-        }).sum()
-    }
+        })
+        .sum()
 }
-
