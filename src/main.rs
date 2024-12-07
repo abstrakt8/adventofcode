@@ -13,7 +13,7 @@ pub fn main() -> Result<()> {
         let input = read_to_string(&file_name);
         if let Ok(input) = input {
             let ans = y22::d1::run(&input);
-            println!("{file_name}: {ans}");
+            println!("{file_name}: {:?}", ans);
         } else {
             println!("Skipped {file_name}");
         }
