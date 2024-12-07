@@ -46,13 +46,11 @@ fn solve1(mut crates: Crates, instructions: &Instructions) -> Crates {
 
 fn solve2(mut crates: Crates, instructions: &Instructions) -> Crates {
     for &(a, b, c) in instructions {
-        let mut v = vec![];
-        for _ in 0..a {
-            if let Some(x) = crates[b].pop_back() {
-                v.push(x);
-            }
+        let len = crates[b].len();
+        if b != c {
+            let drained: Vec<_> = {crates[b].drain((len - a)..).rev().collect()};
+            crates[c].extend(drained);
         }
-        crates[c].extend(v.into_iter().rev());
     }
     crates
 }
@@ -62,10 +60,9 @@ pub fn top_of_the_crates(crates: Crates) -> String {
 }
 
 pub fn run(content: &str) -> (String, String) {
-    let mut it = content.split("\n\n");
+    let (crate_input, input) = content.split_once("\n\n").unwrap();
 
-    let crates = parse_crates(it.next().unwrap());
-    let input = it.next().unwrap();
+    let crates = parse_crates(crate_input);
 
     let re = Regex::new(r"move (\d+) from (\d+) to (\d+)").unwrap();
 
