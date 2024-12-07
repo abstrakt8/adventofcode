@@ -52,7 +52,7 @@ impl Workflow {
                 return r.goto_idx;
             }
         }
-        return self.fallback_idx;
+        self.fallback_idx
     }
 }
 
@@ -126,8 +126,8 @@ pub fn parse_workflow(s: &str) -> Workflow {
     }
 }
 
-const ACCEPT_LABEL: &'static str = "A";
-const REJECT_LABEL: &'static str = "R";
+const ACCEPT_LABEL: &str = "A";
+const REJECT_LABEL: &str = "R";
 
 
 pub fn run(content: &str) -> i64 {

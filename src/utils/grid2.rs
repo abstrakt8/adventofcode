@@ -1,8 +1,6 @@
 use color_eyre::eyre::OptionExt;
 use color_eyre::Result;
 use itertools::Itertools;
-use std::hash::Hash;
-use std::io::BufRead;
 use std::iter;
 // Graph can be anything like Grid, Nodes+Edges, ...
 // Algorithms can be run on the graph, but they should just share the trait
@@ -123,7 +121,7 @@ mod test {
 X.
 NN
 "##;
-        let char_grid = CharGrid::from_str(&grid).expect("To be parsed correctly");
+        let char_grid = CharGrid::from_str(grid).expect("To be parsed correctly");
         // This is under the assumption there is a new line, which is always true otherwise the .expect() will fail for a 1xN grid
         assert_eq!(char_grid.cols, 2);
         assert_eq!(char_grid.rows, 3);

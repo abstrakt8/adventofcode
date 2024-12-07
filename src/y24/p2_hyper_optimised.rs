@@ -12,7 +12,7 @@ fn bitcoin(a: i32, b: i32) -> u8 {
         return ALL;
     }
     let diff = (a - b).abs();
-    if diff < 1 || diff > 3 {
+    if !(1..=3).contains(&diff) {
         0
     } else if a < b {
         INCREASING

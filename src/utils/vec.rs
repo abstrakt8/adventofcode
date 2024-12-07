@@ -6,6 +6,14 @@ pub struct ElasticVector<T> {
     vec: Vec<T>,
 }
 
+impl<T> Default for ElasticVector<T>
+where T: Default
+ {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<T> ElasticVector<T>
     where T: Default {
     pub fn new() -> Self {

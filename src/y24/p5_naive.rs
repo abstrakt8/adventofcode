@@ -10,7 +10,7 @@ struct Node {
 }
 
 pub fn run_dag(content: &str) -> u32 {
-    let mut it = content.split("\n\n").into_iter();
+    let mut it = content.split("\n\n");
 
     let graph = it.next().unwrap();
     let input = it.next().unwrap();
@@ -29,7 +29,7 @@ pub fn run_dag(content: &str) -> u32 {
 
     let mut q: VecDeque<u32> = VecDeque::new();
     for (u, v) in &map {
-        if v.inc.len() == 0 {
+        if v.inc.is_empty() {
             q.push_back(*u);
         }
     }
@@ -78,7 +78,7 @@ pub fn run_dag(content: &str) -> u32 {
 }
 
 pub fn run_1(content: &str) -> u32 {
-    let mut it = content.split("\n\n").into_iter();
+    let mut it = content.split("\n\n");
 
     let graph = it.next().unwrap();
     let input = it.next().unwrap();
@@ -113,7 +113,7 @@ pub fn run_1(content: &str) -> u32 {
 }
 
 pub fn run(content: &str) -> u32 {
-    let mut it = content.split("\n\n").into_iter();
+    let mut it = content.split("\n\n");
 
     let graph = it.next().unwrap();
     let input = it.next().unwrap();

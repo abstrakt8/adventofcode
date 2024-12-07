@@ -5,14 +5,14 @@ fn calibration_value(input: &str) -> u32 {
     let last = find_first_digit(input, true);
 
     // let reversed_str: String = input.chars().rev().collect();
-    return first * 10 + last;
+    first * 10 + last
 }
 
 fn calibration_value_old(input: &str) -> u32 {
     let lst = parse_digits_normal(input);
     let n = lst.len();
     assert!(n >= 1);
-    return lst[0] * 10 + lst[n - 1];
+    lst[0] * 10 + lst[n - 1]
 }
 
 fn parse_digits_normal(input: &str) -> Vec<u32> {
@@ -67,10 +67,10 @@ pub fn run() {
     let contents = fs::read_to_string("../../inputs/y23/1.in")
         .expect("Should have been able to read the file");
 
-    let ferris: u32 = contents.lines().map(|l| calibration_value(&l)).sum();
+    let ferris: u32 = contents.lines().map(calibration_value).sum();
     contents.lines().for_each(|l| {
-        let a = calibration_value(&l);
-        let b = calibration_value_old(&l);
+        let a = calibration_value(l);
+        let b = calibration_value_old(l);
 
         if a != b {
             println!("{:} {:} {:}", a, b, l);

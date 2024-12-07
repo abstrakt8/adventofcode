@@ -13,7 +13,7 @@ pub enum Direction {
 pub const ALL_DIRS: [Direction; 4] = [Direction::LEFT, Direction::RIGHT, Direction::UP, Direction::DOWN];
 
 impl Direction {
-    pub fn opposite(self: &Self) -> Self {
+    pub fn opposite(&self) -> Self {
         match *self {
             Direction::RIGHT => Direction::LEFT,
             Direction::LEFT => Direction::RIGHT,

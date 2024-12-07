@@ -49,7 +49,7 @@ impl Workflow {
                 return &r.goto;
             }
         }
-        return &self.fallback;
+        &self.fallback
     }
 }
 
@@ -113,8 +113,8 @@ pub fn parse_workflow(s: &str) -> Workflow {
     }
 }
 
-const ACCEPT_LABEL: &'static str = "A";
-const REJECT_LABEL: &'static str = "R";
+const ACCEPT_LABEL: &str = "A";
+const REJECT_LABEL: &str = "R";
 
 pub fn run(content: &str) -> i32 {
     let mut it = content.split("\n\n");

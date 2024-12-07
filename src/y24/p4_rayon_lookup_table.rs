@@ -41,12 +41,12 @@ const fn init_next_state() -> [u8; STATE_COUNT * CHAR_COUNT] {
     }
 
     // Set specific transitions
-    matrix[1 * CHAR_COUNT + 1] = 2; // 'M'
+    matrix[CHAR_COUNT + 1] = 2; // 'M'
     matrix[2 * CHAR_COUNT + 2] = 3; // 'A'
     matrix[3 * CHAR_COUNT + 3] = 4; // 'S'
     matrix[4 * CHAR_COUNT + 2] = 5; // 'A'
     matrix[5 * CHAR_COUNT + 1] = 6; // 'M'
-    matrix[6 * CHAR_COUNT + 0] = 1; // 'X'
+    matrix[6 * CHAR_COUNT] = 1; // 'X'
 
     matrix
 }
@@ -56,7 +56,7 @@ const fn init_count_increment() -> [u8; STATE_COUNT * CHAR_COUNT] {
 
     // Set count increments
     matrix[3 * CHAR_COUNT + 3] = 1; // 'S'
-    matrix[6 * CHAR_COUNT + 0] = 1; // 'X'
+    matrix[6 * CHAR_COUNT] = 1; // 'X'
 
     matrix
 }
@@ -135,11 +135,11 @@ pub fn run2(content: &str) -> u32 {
     // This is slower than expected, but probably because too many threads are spawned
     // (1..n - 1).cartesian_product(1..m - 1).par_bridge().map(|(i, j)| ok(i as usize, j as usize)).sum()
 
-    let return_value = (1..n - 1).into_par_iter()
+    
+    (1..n - 1).into_par_iter()
         .map(|i| {
             (1..m - 1).map(|j| ok(i as usize, j as usize)).sum::<u32>()
-        }).sum();
-    return_value
+        }).sum()
 }
 
 pub fn run2_4threads(content: &str) -> u32 {
@@ -175,7 +175,8 @@ pub fn run2_4threads(content: &str) -> u32 {
     let a = bytes.len();
     let c = (a + 3) / 4;
 
-    let ans = [0..c, c..2 * c, 2 * c..3 * c, 3 * c..bytes.len()]
+    
+    [0..c, c..2 * c, 2 * c..3 * c, 3 * c..bytes.len()]
         .into_par_iter()
         .map(|range| {
             let chunk = &bytes[range.start..range.end];
@@ -187,8 +188,7 @@ pub fn run2_4threads(content: &str) -> u32 {
                 ans += xmas(i, j);
             }
             ans
-        }).sum();
-    ans
+        }).sum()
 }
 
 // 1: 2551

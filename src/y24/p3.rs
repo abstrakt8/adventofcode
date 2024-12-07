@@ -33,7 +33,7 @@ pub fn run(content: &str) -> u32 {
                     if b == b',' {
                         second_num = 0;
                         state = 5;
-                    } else if b >= b'0' && b <= b'9' {
+                    } else if b.is_ascii_digit() {
                         first_num = first_num.wrapping_mul(10).wrapping_add((b - b'0') as u32);
                     } else {
                         state = 0;
@@ -43,7 +43,7 @@ pub fn run(content: &str) -> u32 {
                     if b == b')' {
                         result = result.wrapping_add(&first_num.wrapping_mul(second_num));
                         state = 0;
-                    } else if b >= b'0' && b <= b'9' {
+                    } else if b.is_ascii_digit() {
                         second_num = second_num.wrapping_mul(10).wrapping_add((b - b'0') as u32);
                     } else {
                         state = 0;

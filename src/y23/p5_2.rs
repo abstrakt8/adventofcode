@@ -6,7 +6,7 @@ fn parse_vec(input: &str) -> Vec<u64> {
 }
 
 fn in_range(a: u64, b: u64, c: u64) -> bool {
-    return a <= c && c <= b;
+    a <= c && c <= b
 }
 
 type Interval = [u64; 2];
@@ -29,7 +29,7 @@ pub fn run(input: &str) -> u64 {
 
         let mut next_intervals = Vec::new();
         for it in &intervals {
-            let mut cur = it.clone();
+            let mut cur = *it;
             for ra in &ranges {
                 let (dst, src, delta) = (ra[0], ra[1], ra[2]);
                 if let Some(inter) = intersect(cur, [src, src + delta - 1]) {
@@ -51,5 +51,5 @@ pub fn run(input: &str) -> u64 {
         intervals = next_intervals;
     });
 
-    return intervals.iter().map(|f| f[0]).min().unwrap();
+    intervals.iter().map(|f| f[0]).min().unwrap()
 }

@@ -24,12 +24,12 @@ fn count_line(line: &str) -> u32 {
             ans += 1;
         }
     }
-    return ans;
+    ans
 }
 
 fn process1(input: &str) -> u32 {
     input.lines().map(|l| {
-        let c = count_line(&l);
+        let c = count_line(l);
         if c == 0 { 0 } else { 1 << (c - 1) }
     }).sum()
 }
@@ -65,7 +65,7 @@ fn process2(input: &str) -> u32 {
 
     }
 
-    return dp.iter().sum();
+    dp.iter().sum()
 }
 
 // struct Card<'a>(&'a Vec<u32>, &'a Vec<u32>);
@@ -80,7 +80,7 @@ struct Card(Vec<u32>, Vec<u32>);
 fn line_parsing(input: &str) -> Card {
     let l = input.split(": ").last().unwrap();
     let x: Vec<Vec<u32>> = l.split("|").map(number_parsing).collect();
-    return Card(x[0].clone(), x[1].clone());
+    Card(x[0].clone(), x[1].clone())
 }
 
 // mod tests {

@@ -26,7 +26,7 @@ pub fn run2(content: &str) -> u32 {
 
             return flag * a * b;
         }
-        return 0;
+        0
     }).sum()
 }
 

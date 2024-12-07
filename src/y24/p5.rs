@@ -3,7 +3,7 @@ use rayon::prelude::*;
 use std::cmp::Ordering::{Equal, Less};
 
 pub fn run1(content: &str) -> u32 {
-    let mut it = content.split("\n\n").into_iter();
+    let mut it = content.split("\n\n");
     let graph: &str = it.next().unwrap();
     let input: &str = it.next().unwrap();
     let mut bset = bitarr![0; 100000];
@@ -18,7 +18,7 @@ pub fn run1(content: &str) -> u32 {
             if d.is_ascii_digit() {
                 x = x * 10 + (d & 15) as u32;
             } else {
-                x = x * 10;
+                x *= 10;
             }
         }
         bset.set(x as usize, true);
@@ -30,7 +30,7 @@ pub fn run1(content: &str) -> u32 {
     };
 
     input.par_lines().map(|line| {
-        let mut vec: Vec<u32> = line.split(",").map(|x| x.parse().unwrap()).collect();
+        let vec: Vec<u32> = line.split(",").map(|x| x.parse().unwrap()).collect();
         for i in 0..vec.len() {
             for j in i + 1..vec.len() {
                 if contains(vec[j], vec[i]) {
@@ -38,14 +38,14 @@ pub fn run1(content: &str) -> u32 {
                 }
             }
         }
-        return vec[vec.len() / 2];
+        vec[vec.len() / 2]
     }).sum()
     // 6304
     // 6305
 }
 
 pub fn run2(content: &str) -> u32 {
-    let mut it = content.split("\n\n").into_iter();
+    let mut it = content.split("\n\n");
     let graph: &str = it.next().unwrap();
     let input: &str = it.next().unwrap();
     let mut bset = bitarr![0; 100000];
@@ -60,7 +60,7 @@ pub fn run2(content: &str) -> u32 {
             if d.is_ascii_digit() {
                 x = x * 10 + (d & 15) as u32;
             } else {
-                x = x * 10;
+                x *= 10;
             }
         }
         bset.set(x as usize, true);
@@ -85,7 +85,7 @@ pub fn run2(content: &str) -> u32 {
                 }
             }
         }
-        return 0;
+        0
     }).sum()
 }
 

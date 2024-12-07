@@ -34,7 +34,7 @@ pub const ALL_4_DIRS: [Direction; 4] = [
 ];
 
 impl Direction {
-    pub fn opposite(self: &Self) -> Self {
+    pub fn opposite(&self) -> Self {
         match *self {
             Direction::RIGHT => Direction::LEFT,
             Direction::LEFT => Direction::RIGHT,

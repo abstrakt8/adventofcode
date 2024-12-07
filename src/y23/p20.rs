@@ -99,7 +99,7 @@ pub fn run(content: &str) -> u32 {
                     }
                     ModuleType::FLIP(ref mut state) => {
                         // Only low pulses will trigger a flip
-                        if pulse == false {
+                        if !pulse {
                             *state = !*state;
                             q.push_back((to, *state));
                         }

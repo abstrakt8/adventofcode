@@ -22,7 +22,7 @@ fn parse_rgb(input: &str) -> [i32; 3] {
         };
         out[id] = t[0].parse::<i32>().unwrap();
     }
-    return out;
+    out
 }
 
 fn is_solvable(input: &str) -> bool {
@@ -33,7 +33,7 @@ fn is_solvable(input: &str) -> bool {
             return false;
         }
     }
-    return true;
+    true
 }
 
 fn game_id_value(input: &str) -> i32 {
@@ -50,7 +50,7 @@ fn power_value(input: &str) -> i32 {
         let [r, g, b] = parse_rgb(game);
         (r1, g1, b1) = (max(r1, r), max(g1, g), max(b1, b));
     }
-    return r1 * g1 * b1;
+    r1 * g1 * b1
 }
 
 fn game_power_value(input: &str) -> i32 {
@@ -62,10 +62,10 @@ pub fn solve() {
     let contents = fs::read_to_string("../../inputs/y23/2.in")
         .expect("Should have been able to read the file");
 
-    let ans1: i32 = contents.lines().map(|l| game_id_value(&l)).sum();
+    let ans1: i32 = contents.lines().map(game_id_value).sum();
     println!("{:}", ans1);
 
-    let ans2: i32 = contents.lines().map(|l| game_power_value(&l)).sum();
+    let ans2: i32 = contents.lines().map(game_power_value).sum();
     println!("{:}", ans2);
 }
 
@@ -81,7 +81,7 @@ mod tests {
 
     #[test]
     fn test_game_solvable() {
-        assert_eq!(true, is_solvable("1 red, 3 green; 3 blue, 6 green; 5 blue, 1 red, 11 green; 1 red; 3 green, 13 blue"))
+        assert!(is_solvable("1 red, 3 green; 3 blue, 6 green; 5 blue, 1 red, 11 green; 1 red; 3 green, 13 blue"))
     }
 
     #[test]

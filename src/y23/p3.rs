@@ -10,13 +10,13 @@ fn process1(grid_str: &str) -> u32 {
                 let (ni, nj) = (i as i32 + dx, j as i32 + dy);
                 if ni >= 0 && ni < n as i32 && nj >= 0 && nj < m as i32 {
                     let c = grid[ni as usize][nj as usize];
-                    if c != '.' && !c.is_digit(10) {
+                    if c != '.' && !c.is_ascii_digit() {
                         return true;
                     }
                 }
             }
         }
-        return false;
+        false
     };
     let mut ans = 0;
     for i in 0..grid.len() {
@@ -37,7 +37,7 @@ fn process1(grid_str: &str) -> u32 {
         }
         ans += f * x;
     }
-    return ans;
+    ans
 }
 
 fn process2(grid_str: &str) -> u32 {
@@ -56,7 +56,7 @@ fn process2(grid_str: &str) -> u32 {
                 }
             }
         }
-        return out;
+        out
     };
 
     let mut ans = 0;
@@ -71,14 +71,14 @@ fn process2(grid_str: &str) -> u32 {
                 adjacent_stars(i, j).iter().for_each(|pos| { stars.insert(*pos); });
             } else {
                 stars.iter().for_each(|pos| {
-                    reverse_pos.entry(*pos).or_insert(Vec::new()).push(x);
+                    reverse_pos.entry(*pos).or_default().push(x);
                 });
                 stars.clear();
                 x = 0;
             }
         }
         stars.iter().for_each(|pos| {
-            reverse_pos.entry(*pos).or_insert(Vec::new()).push(x);
+            reverse_pos.entry(*pos).or_default().push(x);
         });
         // flush(x); TODO How to do this cleanly?
     }
@@ -88,7 +88,7 @@ fn process2(grid_str: &str) -> u32 {
             ans += numbers[0] * numbers[1]
         }
     }
-    return ans;
+    ans
 }
 
 pub fn solve() {

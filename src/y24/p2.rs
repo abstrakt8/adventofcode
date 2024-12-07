@@ -51,9 +51,9 @@ pub fn run(content: &str) -> u32 {
             }
             [prev_prev, prev] = [prev, cur];
         }
-        let res = (c != 0) as u32;
+        
         // println!("{line} {res}");
-        res
+        (c != 0) as u32
     }).sum();
     // 536
     res

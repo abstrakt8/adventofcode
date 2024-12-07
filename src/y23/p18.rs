@@ -83,8 +83,8 @@ pub fn run(content: &str) -> Result<i32> {
                 for neighbor in cell.neighbors4() {
                     if !neighbor.inside_rectangle(min_cell, max_cell) {
                         inside = false;
-                    } else if !grid.contains_key(&neighbor) {
-                        grid.insert(neighbor, generation);
+                    } else if let std::collections::hash_map::Entry::Vacant(e) = grid.entry(neighbor) {
+                        e.insert(generation);
                         q.push_back(neighbor);
                         print(&grid, &min_cell, &max_cell);
                     }

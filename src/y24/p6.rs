@@ -79,7 +79,7 @@ pub fn run_part(content: &str, part: Part) -> u32 {
     //     static BSET: RefCell<BitArrayType> = RefCell::new(bitarr![u16, LocalBits; 0; 150*150*4]);
     // }
     let num_threads = rayon::current_num_threads();
-    let mut bsets: Vec<_> = (0..num_threads)
+    let bsets: Vec<_> = (0..num_threads)
         .map(|_| Mutex::new(bitarr![0; 150*150*4]))
         .collect();
 

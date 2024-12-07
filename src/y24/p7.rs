@@ -11,7 +11,6 @@ fn parse(line: &str) -> (u64, Vec<u64>) {
         .and_then(|(num, input)| {
             let num = num.trim().parse().ok()?;
             let vecs = input
-                .trim()
                 .split_whitespace()
                 .filter_map(|t| t.parse().ok())
                 .collect();

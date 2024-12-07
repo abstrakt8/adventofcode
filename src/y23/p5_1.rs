@@ -4,7 +4,7 @@ fn parse_vec(input: &str) -> Vec<u64> {
 }
 
 fn in_range(a: u64, b: u64, c: u64) -> bool {
-    return a <= c && c <= b;
+    a <= c && c <= b
 }
 
 pub fn run(input: &str) -> u64 {
@@ -27,5 +27,5 @@ pub fn run(input: &str) -> u64 {
         }
     });
     let ans = seeds.iter().min().unwrap();
-    return *ans;
+    *ans
 }

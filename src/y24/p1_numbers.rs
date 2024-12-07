@@ -22,7 +22,7 @@ pub fn run(content: &str) -> u32 {
             ans += count1[num2 as usize] * num2;
         }
 
-        ans as u32
+        ans
     }
 }
 
