@@ -16,7 +16,7 @@ fn map_state(state: State) -> u32 {
     }
 }
 
-fn map_str(b: &str) -> State {
+fn str_to_state(b: &str) -> State {
     match b {
         "A" => State::Rock,
         "B" => State::Paper,
@@ -24,6 +24,15 @@ fn map_str(b: &str) -> State {
         "X" => State::Rock,
         "Y" => State::Paper,
         "Z" => State::Scissors,
+        _ => unreachable!(),
+    }
+}
+
+fn str_to_ordering(s: &str) -> Ordering {
+    match s {
+        "X" => Ordering::Less,
+        "Y" => Ordering::Equal,
+        "Z" => Ordering::Greater,
         _ => unreachable!(),
     }
 }
@@ -48,6 +57,14 @@ fn ordering(x: State, y: State) -> Ordering {
     }
 }
 
+fn which_state(opp: State, outcome: Ordering) -> State {
+    [State::Paper, State::Scissors, State::Rock]
+        .iter()
+        .find(|&me| ordering(*me, opp) == outcome)
+        .cloned()
+        .unwrap()
+}
+
 fn map_ordering(ordering: Ordering) -> u32 {
     match ordering {
         Ordering::Less => 0,
@@ -66,12 +83,22 @@ pub fn run(content: &str) -> (u32, u32) {
         .map(|line| {
             let (a, b) = line
                 .split_whitespace()
-                .map(map_str)
+                .map(str_to_state)
                 .collect_tuple()
                 .unwrap();
             score(a, b)
         })
         .sum();
 
-    (ans1, 0)
+    let ans2 = content
+        .lines()
+        .map(|line| {
+            let (a, w) = line.split_whitespace().collect_tuple().unwrap();
+            let a = str_to_state(a);
+            let outcome = str_to_ordering(w);
+            let b = which_state(a, outcome);
+            score(a, b)
+        })
+        .sum();
+    (ans1, ans2)
 }
