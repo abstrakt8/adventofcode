@@ -3,17 +3,8 @@ use std::collections::HashSet;
 fn solve(bytes: &[u8], len: usize) -> usize {
     bytes
         .windows(len)
-        .enumerate()
-        .filter_map(|(i, b)| {
-            let s: HashSet<u8> = HashSet::from_iter(b.into_iter().copied());
-            if s.len() == len {
-                Some(i + len)
-            } else {
-                None
-            }
-        })
-        .next()
-        .unwrap()
+        .position(|window| window.iter().collect::<HashSet<_>>().len() == len)
+        .map_or(0, |pos| pos + len)
 }
 
 pub fn run(content: &str) -> (usize, usize) {
