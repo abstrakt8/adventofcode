@@ -1,9 +1,9 @@
-use adventofcode::y22;
+use adventofcode::{y22, y24};
 use color_eyre::Result;
 use std::fs::read_to_string;
 
-const YEAR: u32 = 22;
-const DAY: u32 = 14;
+const YEAR: u32 = 24;
+const DAY: u32 = 8;
 
 pub fn main() -> Result<()> {
     color_eyre::install()?;
@@ -12,7 +12,7 @@ pub fn main() -> Result<()> {
         let file_name = format!("./inputs/y{YEAR}/{DAY}{suffix}");
         let input = read_to_string(&file_name);
         if let Ok(input) = input {
-            let ans = y22::d14::run(&input);
+            let ans = y24::p8::run(&input);
             println!("{file_name}: {:?}", ans);
         } else {
             println!("Skipped {file_name}");
