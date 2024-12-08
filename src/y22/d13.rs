@@ -1,18 +1,15 @@
 use itertools::Itertools;
 use serde_json::Value;
-use std::cmp::{min, Ordering};
+use std::cmp::Ordering;
 
 fn compare(a: &Value, b: &Value) -> Ordering {
     match (a, b) {
-        (Value::Array(a), Value::Array(b)) => {
-            for i in 0..min(a.len(), b.len()) {
-                let c = compare(&a[i], &b[i]);
-                if c != Ordering::Equal {
-                    return c;
-                }
-            }
-            a.len().cmp(&b.len())
-        }
+        (Value::Array(a), Value::Array(b)) => a
+            .iter()
+            .zip(b)
+            .map(|(a, b)| compare(a, b))
+            .find(|&ord| ord != Ordering::Equal)
+            .unwrap_or_else(|| a.len().cmp(&b.len())),
         (Value::Number(a), Value::Number(b)) => a.as_u64().unwrap().cmp(&b.as_u64().unwrap()),
         (Value::Number(_), Value::Array(_)) => compare(&Value::Array(vec![a.clone()]), b),
         (Value::Array(_), Value::Number(_)) => compare(a, &Value::Array(vec![b.clone()])),
@@ -43,20 +40,24 @@ pub fn run(content: &str) -> (usize, usize) {
 
     let divider1: Value = serde_json::from_str("[[2]]").unwrap();
     let divider2: Value = serde_json::from_str("[[6]]").unwrap();
-    let dividers = [divider1.clone(), divider2.clone()];
+    let dividers = [divider1, divider2];
 
     let mut all: Vec<Value> = input
         .into_iter()
         .flatten()
-        .chain(dividers.into_iter())
+        .chain(dividers.iter().cloned())
         .collect::<Vec<_>>();
     all.sort_by(compare);
 
     let ans2 = all
         .iter()
-        .positions(|v| v.eq(&divider1) || v.eq(&divider2))
+        .positions(|v| dividers.contains(v))
         .map(|i| i + 1)
         .product();
 
+    /*
+    ./inputs/y22/13_example.in: (13, 140)
+    ./inputs/y22/13.in: (5503, 20952)
+     */
     (ans1, ans2)
 }
