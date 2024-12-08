@@ -40,9 +40,7 @@ impl Grid {
         self.blocked.insert(p);
         self.lowest
             .entry(p.x)
-            .and_modify(|y| {
-                *y = max(*y, p.y);
-            })
+            .and_modify(|y| *y = max(*y, p.y))
             .or_insert(p.y);
         self.all_lowest = max(self.all_lowest, p.y);
     }
@@ -55,43 +53,16 @@ impl Grid {
         self.is_blocked(p) || p.y == self.all_lowest + 2
     }
 
-    fn simulate_place1(&mut self, mut cur: Point) -> bool {
-        loop {
-            if self.lowest.get(&cur.x).is_none_or(|h| *h < cur.y) {
-                return true;
-            }
-
-            let dir = [Point::new(0, 1), Point::new(-1, 1), Point::new(1, 1)]
-                .into_iter()
-                .find(|&d| {
-                    let nxt = cur + d;
-                    !self.is_blocked(&nxt)
-                });
-
-            if let Some(dir) = dir {
-                cur = cur + dir;
-            } else {
-                self.blocked.insert(cur);
-                return false;
-            }
-        }
-    }
-    fn solve_1(&mut self) -> u32 {
-        let origin = Point::new(500, 0);
-
-        let mut ans1 = 0;
-        while !self.simulate_place1(origin) {
-            ans1 += 1;
-        }
-
-        ans1
+    fn is_dropping_into_abyss(&self, cur: &Point) -> bool {
+        self.lowest.get(&cur.x).is_none_or(|h| *h < cur.y)
     }
 
-    fn simulate_place2(&mut self, mut cur: Point) -> bool {
-        if self.is_blocked_or_floor(&cur) {
-            return true;
-        }
-        loop {
+    fn simulate_until_cant_place(
+        &mut self,
+        mut cur: Point,
+        cant_place_check: &impl Fn(&Self, &Point) -> bool,
+    ) -> bool {
+        while !cant_place_check(self, &cur) {
             let dir = [Point::new(0, 1), Point::new(-1, 1), Point::new(1, 1)]
                 .into_iter()
                 .find(|&d| {
@@ -103,19 +74,28 @@ impl Grid {
                 cur = cur + dir;
             } else {
                 self.blocked.insert(cur);
-                return false;
+                return true;
             }
         }
+        false // Cant place anymore
     }
-    fn solve_2(&mut self) -> u32 {
+
+    fn simulate(&mut self, cant_place_check: impl Fn(&Self, &Point) -> bool) -> u32 {
         let origin = Point::new(500, 0);
 
-        let mut ans1 = 0;
-        while !self.simulate_place2(origin) {
-            ans1 += 1;
+        let mut ans = 0;
+        while self.simulate_until_cant_place(origin, &cant_place_check) {
+            ans += 1;
         }
 
-        ans1
+        ans
+    }
+
+    fn solve_1(&mut self) -> u32 {
+        self.simulate(|grid, p| grid.is_dropping_into_abyss(p))
+    }
+    fn solve_2(&mut self) -> u32 {
+        self.simulate(|grid, p| grid.is_blocked(p))
     }
 }
 
@@ -136,9 +116,9 @@ pub fn run(content: &str) -> (u32, u32) {
             })
             .collect::<Vec<_>>();
 
-        v.windows(2).for_each(|x| {
-            let mut cur = x[0];
-            let nxt = x[1];
+        v.windows(2).for_each(|window| {
+            let mut cur = window[0];
+            let nxt = window[1];
             let dir = pos_delta_signum(nxt, cur);
 
             grid.add_block(cur);
