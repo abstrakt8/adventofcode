@@ -18,6 +18,7 @@ color-eyre = "0.6.2"
 rayon = "1.10.0"
 memchr = "2.7.4"
 bitvec = "1.0.1"
+serde_json = "1.0.133"
 
 [dev-dependencies]
 rstest = "0.18.2"
