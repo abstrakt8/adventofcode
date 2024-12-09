@@ -15,3 +15,4 @@ pub mod p5_naive;
 pub mod p6;
 pub mod p7;
 pub mod p8;
+pub mod d9;
