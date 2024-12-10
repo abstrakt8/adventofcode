@@ -146,7 +146,7 @@ pub fn run2_fast(content: &str) -> u32 {
 
     let mut ans = 0;
 
-    let check = |q: &mut VecDeque<usize>, vis: &mut BitVec, ways: &mut Vec<u32>, cur: usize, delta: i32| {
+    let mut check = |q: &mut VecDeque<usize>, ways: &mut Vec<u32>, cur: usize, delta: i32| {
         let new = (cur as i32) + delta;
         if new >= 0 && (new as usize) < nbytes {
             let new = new as usize;
@@ -159,15 +159,14 @@ pub fn run2_fast(content: &str) -> u32 {
             }
         }
     };
+    
     while let Some(pos) = q.pop_front() {
         if bytes[pos] == b'0' {
             ans += ways[pos];
         } else {
-            [-(cols as i32), cols as i32, -1, 1]
-                .iter()
-                .for_each(|&delta| {
-                    check(&mut q, &mut vis, &mut ways, pos, delta);
-                });
+            for delta in [-(cols as i32), cols as i32, -1, 1] {
+                check(&mut q, &mut ways, pos, delta);
+            }
         }
     }
 
