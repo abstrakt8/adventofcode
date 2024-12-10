@@ -1,7 +1,8 @@
+use bitvec::prelude::*;
 use std::collections::VecDeque;
 
 pub fn run(content: &str) -> u32 {
-    run1(content)
+    run2_fast(content)
 }
 
 pub fn run1(content: &str) -> u32 {
@@ -125,4 +126,50 @@ pub fn run2(content: &str) -> u32 {
     // println!("{:?}", ways);
 
     ans1
+}
+
+pub fn run2_fast(content: &str) -> u32 {
+    let bytes = content.as_bytes();
+    let nbytes = bytes.len();
+
+    // We just include new line as a character as well, doesn't really matter because it's not 1 away from any of the digits.
+    let cols = memchr::memchr(b'\n', bytes).unwrap() + 1;
+    let mut ways = vec![0; nbytes];
+    let mut vis = bitvec![0; nbytes];
+
+    let mut q: VecDeque<usize> = VecDeque::new();
+    for pos in memchr::memchr_iter(b'9', bytes) {
+        ways[pos] = 1;
+        vis.set(pos, true);
+        q.push_back(pos);
+    }
+
+    let mut ans = 0;
+
+    let check = |q: &mut VecDeque<usize>, vis: &mut BitVec, ways: &mut Vec<u32>, cur: usize, delta: i32| {
+        let new = (cur as i32) + delta;
+        if new >= 0 && (new as usize) < nbytes {
+            let new = new as usize;
+            if bytes[cur] == bytes[new] + 1 {
+                ways[new] += ways[cur];
+                if !vis[new] {
+                    vis.set(new, true);
+                    q.push_back(new);
+                }
+            }
+        }
+    };
+    while let Some(pos) = q.pop_front() {
+        if bytes[pos] == b'0' {
+            ans += ways[pos];
+        } else {
+            [-(cols as i32), cols as i32, -1, 1]
+                .iter()
+                .for_each(|&delta| {
+                    check(&mut q, &mut vis, &mut ways, pos, delta);
+                });
+        }
+    }
+
+    ans
 }
