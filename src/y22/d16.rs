@@ -2,16 +2,14 @@ use regex::Regex;
 use std::cmp::max;
 use std::collections::{HashMap, VecDeque};
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 struct Node {
     flow_rate: u32,
     others: Vec<usize>,
     candidate_id: Option<usize>,
 }
 
-
-
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 struct Graph<'a> {
     entries: HashMap<&'a str, usize>,
     pub nodes: Vec<Node>,
@@ -22,7 +20,6 @@ struct Graph<'a> {
 fn is_bit_set(mask: u16, i: usize) -> bool {
     ((mask >> i) & 1) > 0
 }
-
 
 impl<'a> Graph<'a> {
     pub fn get_id(&self, key: &'a str) -> usize {
@@ -57,7 +54,6 @@ impl<'a> Graph<'a> {
             .map(|(_, c)| self.nodes[*c].flow_rate)
             .sum()
     }
-
 }
 mod part_1 {
     use super::*;
@@ -65,11 +61,12 @@ mod part_1 {
     const MAX_TIME: usize = 30;
     #[derive(Hash, Eq, PartialEq, Clone, Debug, Default)]
     pub struct State {
-        u: usize,
+        helpers: Vec<usize>,
+        h: usize, // Helper index
+
         t: usize,
         mask: u16,
     }
-
 
     #[derive(Default)]
     pub struct SolverData {
@@ -83,9 +80,10 @@ mod part_1 {
     }
 
     impl SolverData {
-        fn check(&mut self,  state: State, max_flow: u32) -> u32 {
+        fn check(&mut self, state: State, max_flow: u32) -> u32 {
             let mut inserted = true;
-            let new_best_flow = *self.dp
+            let new_best_flow = *self
+                .dp
                 .entry(state.clone())
                 .and_modify(|state| {
                     *state = max(*state, max_flow);
@@ -104,18 +102,18 @@ mod part_1 {
         pub fn new(graph: Graph<'a>) -> Self {
             Self {
                 graph,
-                data: SolverData::default()
+                data: SolverData::default(),
             }
         }
 
-        pub fn solve(&mut self) -> u32 {
+        pub fn solve(&mut self, num_helpers: usize, max_time: usize) -> u32 {
             let graph = &self.graph;
             let data = &mut self.data;
-            let initial_id = graph.get_id("AA");
 
             data.check(
                 State {
-                    u: initial_id,
+                    helpers: vec![graph.get_id("AA"); num_helpers],
+                    h: 0,
                     t: 0,
                     mask: 0,
                 },
@@ -127,27 +125,45 @@ mod part_1 {
             // The reason the queue approach works is that every action takes t=1 time.
             // We need to process the DP state by the order of time i.e.
             // DP[t][u][mask] = max(DP[t-1][..][..] + f(...))
+            let mut seen_t = 0;
             while let Some(state) = data.queue.pop_front() {
-                let State { u, t, mask } = state;
-                let pressure = data.dp[&state];
+                let State {
+                    ref helpers,
+                    h,
+                    t,
+                    mask,
+                } = state;
+                if seen_t < t {
+                    seen_t = t;
+                    println!("t={seen_t}");
+                }
+                
+                // println!("State={:?}", state);
+                
+                // let pressure = data.dp[&state];
+                let max_helper_reached = h + 1 == num_helpers;
+                let new_h = if max_helper_reached { 0 } else { h + 1 };
+                let new_t = t + if max_helper_reached { 1 } else { 0 };
+                // We only add the pressure at h=0 from the last minute to simplify things
+                let new_pressure = data.dp[&state] + if h == 0 { graph.flow_rate(mask) } else { 0 };
                 // println!("State={:?} Pressure={:?}", state, pressure);
 
-                ans = max(ans, pressure);
+                ans = max(ans, new_pressure);
 
-                if t > MAX_TIME {
+                if t >= max_time {
                     break;
                 }
 
-                let new_pressure = pressure + graph.flow_rate(mask);
+                let u = helpers[h];
                 // Open the valve if it's a candidate to open up
-                if let Some(candidate_id) = graph.nodes[u].candidate_id {
+                if let Some(candidate_id) = graph.nodes[u].candidate_id.clone() {
                     if !is_bit_set(mask, candidate_id) {
-
                         let new_mask = mask | (1 << candidate_id);
                         data.check(
                             State {
-                                u,
-                                t: t + 1,
+                                helpers: helpers.clone(),
+                                t: new_t,
+                                h: new_h,
                                 mask: new_mask,
                             },
                             new_pressure,
@@ -155,9 +171,30 @@ mod part_1 {
                     }
                 }
 
-                data.check(State { u, t: t + 1, mask }, new_pressure);
+                // Stay for some reason (e.g. otherwise in a graph with only one node we are not solving it properly)
+                // data.check(
+                //     State {
+                //         helpers: helpers.clone(),
+                //         t: new_t,
+                //         h: new_h,
+                //         mask,
+                //     },
+                //     new_pressure,
+                // );
+
                 for other in &graph.nodes[u].others {
-                    data.check(State { u: *other, t: t + 1, mask }, new_pressure);
+                    let mut new_helpers = helpers.clone();
+                    new_helpers[h] = *other;
+
+                    data.check(
+                        State {
+                            helpers: new_helpers,
+                            t: new_t,
+                            h: new_h,
+                            mask,
+                        },
+                        new_pressure,
+                    );
                 }
             }
 
@@ -166,8 +203,9 @@ mod part_1 {
     }
 }
 
-pub fn run(content: &str) -> u32 {
-    let re = Regex::new(r"Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.+)").unwrap();
+pub fn run(content: &str) -> (u32, u32) {
+    let re =
+        Regex::new(r"Valve (\w+) has flow rate=(\d+); tunnels? leads? to valves? (.+)").unwrap();
 
     let mut graph: Graph = Default::default();
     for line in content.lines() {
@@ -182,11 +220,13 @@ pub fn run(content: &str) -> u32 {
             let other = graph.get_or_set_id(other);
             graph.add_edge(valve, other);
         }
-
     }
 
-    println!("{:?}", graph);
+    // println!("{:?}", graph);
 
-    part_1::Solver::new(graph).solve()
+    // let ans1 = part_1::Solver::new(graph.clone()).solve(1, 30);
+    let ans2 = part_1::Solver::new(graph).solve(2, 26);
+    // let ans2 = 0;
 
+    (0, ans2)
 }
