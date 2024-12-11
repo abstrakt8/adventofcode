@@ -249,7 +249,7 @@ mod dp_all_states {
 }
 mod a_star {
     use super::*;
-    use std::cmp::{min, Ordering};
+    use std::cmp::Ordering;
     use std::collections::{BinaryHeap, HashSet};
 
     #[derive(Hash, Clone, Debug, Default, Eq, PartialEq)]

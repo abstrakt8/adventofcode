@@ -1,7 +1,6 @@
 use regex::Regex;
-use std::cmp::{max, min};
 use std::collections::HashSet;
-use std::ops::{Range, RangeInclusive};
+use std::ops::RangeInclusive;
 
 #[derive(Debug, Default, Ord, PartialOrd, Eq, PartialEq, Hash, Clone)]
 struct Point {
