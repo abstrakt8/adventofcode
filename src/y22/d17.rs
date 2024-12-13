@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::collections::{HashMap, HashSet};
 use std::fmt::{Debug, Formatter};
 
 #[derive(Copy, Clone)]
@@ -138,8 +139,9 @@ impl Tetris {
                     WindDirection::LEFT => -1,
                     WindDirection::RIGHT => 1,
                 };
-            if new_col < 0 || new_col + (*t_width as i32) - 1 >= GRID_WIDTH as i32 ||
-                self.intersects(cells, row, new_col as usize)
+            if new_col < 0
+                || new_col + (*t_width as i32) - 1 >= GRID_WIDTH as i32
+                || self.intersects(cells, row, new_col as usize)
             {
                 col // Either revert back
             } else {
@@ -165,6 +167,8 @@ impl Tetris {
 struct Solver {
     wind_direction: Vec<WindDirection>,
     tetris: Tetris,
+
+    heights: HashMap<(usize, usize), Vec<(usize, usize)>>,
 }
 
 impl Solver {
@@ -173,35 +177,67 @@ impl Solver {
         Self {
             wind_direction,
             tetris: Default::default(),
+            heights: Default::default(),
         }
     }
-    pub fn solve(&mut self) -> usize {
-        let num_pieces = 2022;
-        // let num_pieces = 10;
+
+    pub fn solve(&mut self, num_pieces: usize) -> usize {
         let mut wind_index = 0;
-        for i in 0..num_pieces {
+        let mut i = 0;
+        let mut skipped_cycles_height = 0;
+        let mut found_cycle = false;
+        
+        while i < num_pieces {
             let mut pos = (self.tetris.height() + 3, 2);
             let tetromino_type = i % TETROMINOS.len();
 
             loop {
                 let wind_direction = self.wind_direction[wind_index % self.wind_direction.len()];
                 let new_pos = self.tetris.next_pos(pos, tetromino_type, wind_direction);
-                wind_index += 1;
+                wind_index = (wind_index + 1) % self.wind_direction.len();
                 if new_pos.0 == pos.0 {
                     pos = new_pos;
                     break;
                 }
                 pos = new_pos;
             }
-
             self.tetris.put(pos, tetromino_type);
-            // println!("i={} tetris=\n{:?}", i, self.tetris);
+
+            if !found_cycle {
+                let key = (wind_index, tetromino_type);
+                let h1 = self.tetris.height();
+                if let Some(seen_heights) = self.heights.get(&key) {
+                    for &(h2, j)in seen_heights.iter().rev() {
+                        let h_diff = h1 - h2;
+                        if h2 < h_diff {
+                            continue;
+                        }
+
+                        found_cycle = self.tetris.grid[(h2- h_diff +1)..h2] == self.tetris.grid[(h1- h_diff +1)..h1];
+                        if found_cycle {
+                            let cycle_num_pieces = i - j;
+                            let pieces_left = num_pieces - i;
+                            let cycles_fit = pieces_left / cycle_num_pieces;
+                            skipped_cycles_height = cycles_fit * h_diff;
+                            i += cycles_fit * cycle_num_pieces;
+                            // dbg!(skipped_cycles_height);
+                            break;
+                        }
+                    }
+                }
+                self.heights
+                    .entry(key)
+                    .or_default()
+                    .push((h1, i));
+            }
+            i += 1;
         }
-        self.tetris.height()
+        skipped_cycles_height + self.tetris.height()
     }
 }
 
-pub fn run(content: &str) -> usize {
-    let mut solver = Solver::new(content);
-    solver.solve()
+pub fn run(content: &str) -> (usize, usize) {
+    let ans1 = Solver::new(content).solve(2022);
+    let ans2 = Solver::new(content).solve(1000000000000);
+    (ans1, ans2)
 }
