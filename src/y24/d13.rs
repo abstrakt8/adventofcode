@@ -96,10 +96,14 @@ impl ClawMachine {
         }
         let b = n / d;
 
-        if b >= 0 && (z1 - y1 * b) % x1 == 0 {
-            let a = (z1 - y1 * b) / x1;
+        if !(b >= 0 && (z1 - y1 * b) % x1 == 0) {
+            return None;
+        }
+        let a = (z1 - y1 * b) / x1;
+        if a >= 0 {
             Some(a * 3 + b * 1)
-        } else {
+        } else 
+        {
             None
         }
     }
