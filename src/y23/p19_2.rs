@@ -153,7 +153,7 @@ pub fn run(content: &str) -> i64 {
 
     let mut ans = 0i64;
 
-    let starting_idx = *workflow_idx.get(&"in".to_string()).unwrap();
+    let starting_idx = *workflow_idx.get("in").unwrap();
     let check = |xmas: &Part| {
         let mut steps = 0;
         let mut current = starting_idx;

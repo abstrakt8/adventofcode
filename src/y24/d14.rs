@@ -15,6 +15,8 @@ impl Point {
         Self { x, y }
     }
 }
+
+#[allow(clippy::duplicate_code)]
 impl Add for Point {
     type Output = Self;
 
@@ -28,7 +30,7 @@ impl Add for Point {
 impl<T> Mul<T> for Point
 where
     T: Copy,
-    i32: Mul<T, Output=i32>
+    i32: Mul<T, Output=i32>,
 {
     type Output = Self;
 
@@ -38,10 +40,6 @@ where
             y: self.y * rhs,
         }
     }
-}
-
-fn pos_delta_signum(a: Point, b: Point) -> Point {
-    Point::new((a.x - b.x).signum(), (a.y - b.y).signum())
 }
 
 impl Point {
@@ -66,15 +64,34 @@ fn modulo(i: i32, n: i32) -> i32 {
     ((i % n) + n) % n
 }
 
-pub fn solve(content: &str, width: usize, height: usize, seconds: i32) -> usize {
+fn parse_input(content: &str) -> Vec<(Point, Point)> {
+    content
+        .lines()
+        .map(|line| {
+            let (_, (a, v)) = crate::y24::d14::parse_points(line).expect("Expected!");
+            (a, v)
+        })
+        .collect()
+}
+
+fn simulate(v: Vec<(Point, Point)>, seconds: i32, width: usize, height: usize) -> Vec<(Point, Point)> {
+    v.into_iter()
+        .map(|(a, v)| {
+            let mut c = a + (v * seconds);
+            c.x = modulo(c.x, width as i32);
+            c.y = modulo(c.y, height as i32);
+            (c, v)
+        })
+        .collect()
+}
+
+pub fn solve_part1(content: &str, width: usize, height: usize, seconds: i32) -> usize {
     // If we just look at x and y independently, then it makes sense to just wrap around in their respective dimensions
-
     let mut quadrant_count = [0; 4];
-
     let w_half = width / 2;
     let h_half = height / 2;
 
-    let quadrant = |c: Point| -> Option<usize> {
+    let quadrant = |c: &Point| -> Option<usize> {
         if c.x == w_half as i32 || c.y == h_half as i32 {
             None
         } else {
@@ -84,24 +101,18 @@ pub fn solve(content: &str, width: usize, height: usize, seconds: i32) -> usize 
         }
     };
 
-    let mut v: Vec<(Point, Point)> = content
-        .lines()
-        .map(|line| {
-            let (_, (a, v)) = parse_points(line).expect("Expected!");
-            (a, v)
-        })
-        .collect();
+    let input: Vec<(Point, Point)> = parse_input(content);
+    let simulated = simulate(input, seconds, width, height);
+    for (point, _) in simulated {
+        if let Some(q) = quadrant(&point) {
+            quadrant_count[q] += 1;
+        }
+    }
+    quadrant_count.into_iter().product()
+}
 
-    let simulate = |v: Vec<(Point, Point)>, seconds: i32| -> Vec<(Point, Point)> {
-        v.into_iter()
-            .map(|(a, v)| {
-                let mut c = a + (v * seconds);
-                c.x = modulo(c.x, width as i32);
-                c.y = modulo(c.y, height as i32);
-                (c, v)
-            })
-            .collect()
-    };
+pub fn solve_part2(content: &str, width: usize, height: usize) -> usize {
+    let mut input: Vec<(Point, Point)> = parse_input(content);
 
     let draw = |v: &Vec<(Point, Point)>| -> Vec<Vec<char>> {
         let mut grid = vec![vec!['.'; width]; height];
@@ -123,32 +134,28 @@ pub fn solve(content: &str, width: usize, height: usize, seconds: i32) -> usize 
             }
         }
         // maybe more conditions
-        if count_triangle > w_half {
-            return true;
-        } else {
-            return false;
-        }
+        count_triangle > width
     };
 
-    for seconds in (0..10000) {
-        v = simulate(v.clone(), 1);
-        let grid = draw(&v);
+    for seconds in 0..10000 {
+        input = simulate(input.clone(), 1, width, height);
+        let grid = draw(&input);
 
         if might_be_tree(&grid) {
-            println!("t={}", seconds + 1);
-            for row in grid {
-                println!("{}", row.iter().collect::<String>());
+            if true {
+                println!("t={}", seconds + 1);
+                for row in grid {
+                    println!("{}", row.iter().collect::<String>());
+                }
             }
+            return seconds;
         }
     }
-
-    dbg!(quadrant_count);
-
-    quadrant_count.into_iter().product()
+    panic!("Not found!");
 }
 
 pub fn run(content: &str) -> usize {
-    solve(content, 101, 103, 100)
+    solve_part1(content, 101, 103, 100)
 }
 
 #[cfg(test)]
@@ -175,6 +182,6 @@ p=7,3 v=-1,2
 p=2,4 v=2,-3
 p=9,5 v=-3,-3
 ";
-        assert_eq!(12, solve(content, 11, 7, 100));
+        assert_eq!(12, solve_part1(content, 11, 7, 100));
     }
 }

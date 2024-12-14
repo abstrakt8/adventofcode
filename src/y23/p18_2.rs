@@ -34,7 +34,7 @@ impl FromStr for Operation {
             let color = it.next().ok_or_else(|| Report::msg("No color given"))?;
             let color = &color[2..color.len() - 1];
             let amount = i32::from_str_radix(&color[..5], 16)?;
-            let mut dir = i32::from_str_radix(&color[5..], 10)?;
+            let mut dir = (&color[5..]).parse::<i32>()?;
 
             // 0 means R, 1 means D, 2 means L, and 3 means U.
             let dir = match dir {

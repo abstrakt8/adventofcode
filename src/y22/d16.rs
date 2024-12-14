@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use regex::Regex;
 use std::cmp::max;
 use std::collections::{HashMap, VecDeque};
@@ -201,7 +200,7 @@ mod dp_all_states {
 
                 let u = helpers[h];
                 // Open the valve if it's a candidate to open up
-                if let Some(candidate_id) = graph.nodes[u].candidate_id.clone() {
+                if let Some(candidate_id) = graph.nodes[u].candidate_id {
                     if !is_bit_set(mask, candidate_id) {
                         let new_mask = mask | (1 << candidate_id);
                         data.check(
@@ -385,7 +384,7 @@ mod a_star {
 
                 let u = helpers[h];
                 // Open the valve if it's a candidate to open up
-                if let Some(candidate_id) = graph.nodes[u].candidate_id.clone() {
+                if let Some(candidate_id) = graph.nodes[u].candidate_id {
                     if !is_bit_set(mask, candidate_id) {
                         let new_mask = mask | (1 << candidate_id);
                         data.check(HeapData {

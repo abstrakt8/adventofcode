@@ -16,7 +16,7 @@ impl From<&str> for ClawMachine {
                 let line: Vec<i64> = line
                     .split(", ")
                     .map(|token| {
-                        let token = token.split_once(&['+', '=']).unwrap().1;
+                        let token = token.split_once(['+', '=']).unwrap().1;
                         token.parse().unwrap()
                     })
                     .collect();
@@ -101,9 +101,8 @@ impl ClawMachine {
         }
         let a = (z1 - y1 * b) / x1;
         if a >= 0 {
-            Some(a * 3 + b * 1)
-        } else 
-        {
+            Some(a * 3 + b)
+        } else {
             None
         }
     }

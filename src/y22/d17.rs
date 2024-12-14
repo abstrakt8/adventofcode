@@ -1,5 +1,4 @@
-use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 
 #[derive(Copy, Clone)]
@@ -140,7 +139,7 @@ impl Tetris {
                     WindDirection::RIGHT => 1,
                 };
             if new_col < 0
-                || new_col + (*t_width as i32) - 1 >= GRID_WIDTH as i32
+                || new_col + (*t_width as i32) > GRID_WIDTH as i32
                 || self.intersects(cells, row, new_col as usize)
             {
                 col // Either revert back

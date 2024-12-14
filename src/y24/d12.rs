@@ -1,5 +1,4 @@
 use std::collections::HashSet;
-use std::fmt::Display;
 
 const DIRECTIONS: [[i32; 2]; 4] = [[-1, 0], [0, 1], [1, 0], [0, -1]];
 
