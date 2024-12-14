@@ -25,10 +25,14 @@ impl Add for Point {
         }
     }
 }
-impl Mul<i32> for Point {
+impl<T> Mul<T> for Point
+where
+    T: Copy,
+    i32: Mul<T, Output=i32>
+{
     type Output = Self;
 
-    fn mul(self, rhs: i32) -> Self::Output {
+    fn mul(self, rhs: T) -> Self::Output {
         Self {
             x: self.x * rhs,
             y: self.y * rhs,
