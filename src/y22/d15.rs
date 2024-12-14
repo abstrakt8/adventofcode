@@ -44,7 +44,7 @@ pub fn run(content: &str) -> u64 {
     let mut calc_intervals = |y_target: i32| {
         let mut intervals: Vec<RangeInclusive<i32>> = vec![];
         for (s, b) in &signal_pairs {
-            let mut dist = hamilton(&s, &b) as i32;
+            let mut dist = hamilton(s, b) as i32;
             dist -= y_target.abs_diff(s.y) as i32;
 
             if dist < 0 {
@@ -65,7 +65,7 @@ pub fn run(content: &str) -> u64 {
                 intervals.push(x1..=x2);
             }
         }
-        intervals.sort_by(|x, y| x.start().cmp(&y.start()));
+        intervals.sort_by(|x, y| x.start().cmp(y.start()));
 
         let mut close: i32 = 0;
         for range in intervals {

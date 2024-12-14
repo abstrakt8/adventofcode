@@ -5,8 +5,8 @@ pub fn run(content: &str) -> (u32, u32) {
             lines
                 .lines()
                 .map(|x| {
-                    let x = x.parse::<u32>().unwrap();
-                    x
+                    
+                    x.parse::<u32>().unwrap()
                 })
                 .sum()
         })

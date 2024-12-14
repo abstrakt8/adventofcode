@@ -94,7 +94,7 @@ impl Eq for HeapData {}
 
 impl PartialEq<Self> for HeapData {
     fn eq(&self, other: &Self) -> bool {
-        self.cmp(&other).is_eq()
+        self.cmp(other).is_eq()
     }
 }
 
@@ -126,7 +126,8 @@ impl Blueprint {
 }
 
 fn can_build_and_modify(i: usize, a: &mut [u32; N_RESOURCES], cost: &CostMatrix) -> bool {
-    let possible = {
+    
+    {
         if i < 2 && a[0] >= cost[i][0] {
             a[0] -= cost[i][0];
             true
@@ -137,8 +138,7 @@ fn can_build_and_modify(i: usize, a: &mut [u32; N_RESOURCES], cost: &CostMatrix)
         } else {
             false
         }
-    };
-    possible
+    }
 }
 
 impl WrongProblemSolver {

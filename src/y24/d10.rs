@@ -18,7 +18,7 @@ pub fn run1(content: &str) -> u32 {
     let go = |i: usize, j: usize, d: usize| -> Option<(usize, usize)> {
         let ni = (i as i32) + dirs[d][0];
         let nj = (j as i32) + dirs[d][1];
-        return if ni >= 0 && ni < n as i32 && nj >= 0 && nj < m as i32 {
+        if ni >= 0 && ni < n as i32 && nj >= 0 && nj < m as i32 {
             let ni = ni as usize;
             let nj = nj as usize;
             if grid[ni][nj] == grid[i][j] + 1 {
@@ -28,7 +28,7 @@ pub fn run1(content: &str) -> u32 {
             }
         } else {
             None
-        };
+        }
     };
 
     let mut vis: Grid = vec![vec![false; m]; n];
@@ -90,13 +90,10 @@ pub fn run2(content: &str) -> u32 {
             let ni = ni as usize;
             let nj = nj as usize;
             if grid[ni][nj] != grid[i][j] + 1 {
-                return;
             } else {
                 ways[i][j] += ways[ni][nj];
             }
-        } else {
-            return;
-        }
+        } 
     };
 
     let mut ans1 = 0;

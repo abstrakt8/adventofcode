@@ -10,7 +10,7 @@ const DIRECTIONS: [[i32; 3]; 6] = [
 ];
 
 pub fn add(p: &[i32], q: &[i32]) -> Vec<i32> {
-   p.into_iter().zip(q).map(|(a, b)| a + b).collect()
+   p.iter().zip(q).map(|(a, b)| a + b).collect()
 }
 
 pub fn run(content: &str) -> (u32, u32) {
@@ -37,7 +37,9 @@ pub fn run(content: &str) -> (u32, u32) {
         vis.insert(pos.clone());
         // dbg!(&pos);
 
-        let ans = {
+        
+
+        {
             let mut flag = false;
             for d in DIRECTIONS {
                 let q = add(&pos, &d);
@@ -47,16 +49,14 @@ pub fn run(content: &str) -> (u32, u32) {
                 }
             }
             flag
-        };
-
-        ans
+        }
     }
 
     let mut ans1 = 0;
     let mut ans2 = 0;
     for point in &set {
         for dir in DIRECTIONS {
-            let p: Vec<i32> = point.into_iter().zip(dir).map(|(&a, b)| a + b).collect();
+            let p: Vec<i32> = point.iter().zip(dir).map(|(&a, b)| a + b).collect();
             if set.contains(&p) {
                 continue;
             }

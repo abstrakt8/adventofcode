@@ -22,9 +22,7 @@ impl Node {
     pub fn calculate_size(&mut self) -> u32 {
         self.size = self.files.iter().map(|x| x.0).sum();
         self.size += self
-            .children
-            .iter()
-            .map(|(_, c)| c.borrow_mut().calculate_size())
+            .children.values().map(|c| c.borrow_mut().calculate_size())
             .sum::<u32>();
         self.size
     }
@@ -32,9 +30,7 @@ impl Node {
     pub fn find_part1(&self) -> u32 {
         (self.size <= 100000) as u32 * self.size
             + self
-                .children
-                .iter()
-                .map(|(_, c)| c.borrow().find_part1())
+                .children.values().map(|c| c.borrow().find_part1())
                 .sum::<u32>()
     }
     pub fn find_part2(&self, required: u32) -> u32 {
@@ -46,9 +42,7 @@ impl Node {
 
         min(
             this,
-            self.children
-                .iter()
-                .map(|(_, c)| c.borrow().find_part2(required))
+            self.children.values().map(|c| c.borrow().find_part2(required))
                 .min()
                 .unwrap_or(u32::MAX), // Can also not have children
         )

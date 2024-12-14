@@ -45,9 +45,9 @@ pub fn run(content: &str) -> i32 {
 
     let pos0 = vec.iter().position(|(_, val)| *val == 0).unwrap();
 
-    let ans1 = [1000, 2000, 3000]
+    
+    [1000, 2000, 3000]
         .into_iter()
         .map(|x| vec[add(pos0 as i32, x) as usize].1)
-        .sum();
-    ans1
+        .sum()
 }
