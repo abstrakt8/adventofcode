@@ -110,7 +110,7 @@ impl Ord for HeapData {
     }
 }
 
-struct Solver {
+struct WrongProblemSolver {
     blueprint: Blueprint,
 }
 
@@ -141,7 +141,7 @@ fn can_build_and_modify(i: usize, a: &mut [u32; N_RESOURCES], cost: &CostMatrix)
     possible
 }
 
-impl Solver {
+impl WrongProblemSolver {
     pub fn new(blueprint: Blueprint) -> Self {
         Self { blueprint }
     }
@@ -154,6 +154,7 @@ impl Solver {
         let check_and_push =
             |seen: &mut HashSet<State>, heap: &mut BinaryHeap<HeapData>, state: State| {
                 if seen.insert(state.clone()) {
+                    // let potential = heuristic(&state, &cost);
                     let potential = heuristic(&state, &cost);
                     heap.push(HeapData { state, potential });
                 }
@@ -190,17 +191,17 @@ impl Solver {
 
             let state = data.state;
 
-            // Two decisions:
-            // 1. Build one more bot for i
-            // 2. Decide for next bot i+1 (or move on to t+1)
+            if state.t == MAX_TIME {
+                max_geodes = state.a[3];
+                break;
+            }
 
-            // 1. Build one more if possible
-            {
+            // 1. Build one more if possible (can only build one robot at a time)
+            if state.next.iter().sum::<u32>() == 0 {
                 let mut state = state.clone();
-                let i = state.i;
-                let possible = can_build_and_modify(i, &mut state.a, &cost);
+                let possible = can_build_and_modify(state.i, &mut state.a, &cost);
                 if possible {
-                    state.next[i] += 1;
+                    state.next[state.i] += 1;
                     check_and_push(&mut seen, &mut heap, state);
                 }
             }
@@ -209,20 +210,23 @@ impl Solver {
             {
                 let i = state.i;
                 let mut state = state.clone();
-
-                if i == 3 {
-                    state.i = 0;
-                    for i in 0..N_RESOURCES {
-                        state.a[i] += state.b[i];
-                        state.b[i] += state.next[i];
-                        state.next[i] = 0;
+                // let dirty = (0..N_RESOURCES).any(|i| can_build_and_modify(i, &mut state.a, &cost));
+                let dirty = false;
+                if !dirty {
+                    if i == 3 {
+                        state.i = 0;
+                        for i in 0..N_RESOURCES {
+                            state.a[i] += state.b[i];
+                            state.b[i] += state.next[i];
+                            state.next[i] = 0;
+                        }
+                        state.t += 1;
+                    } else {
+                        state.i += 1;
                     }
-                    state.t += 1;
-                } else {
-                    state.i += 1;
-                }
 
-                check_and_push(&mut seen, &mut heap, state);
+                    check_and_push(&mut seen, &mut heap, state);
+                }
             }
         }
 
@@ -233,7 +237,7 @@ impl Solver {
 fn heuristic(state: &State, cost: &CostMatrix) -> u32 {
     let State { b, a, next, .. } = state;
     let cur_time = state.t;
-    if cur_time == MAX_TIME {
+    if cur_time >= MAX_TIME {
         return 0;
     }
 
@@ -273,6 +277,10 @@ fn heuristic(state: &State, cost: &CostMatrix) -> u32 {
     potential_geode
 }
 
+struct Solver {
+    
+}
+
 pub fn run(content: &str) -> u32 {
     let blueprints: Vec<Blueprint> = content
         .lines()
@@ -286,7 +294,8 @@ pub fn run(content: &str) -> u32 {
         .into_iter()
         .map(|blueprint| {
             dbg!(&blueprint.id);
-            Solver::new(blueprint).search()
+            0
+            // Solver::new(blueprint).search()
         })
         .sum()
 }

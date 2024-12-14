@@ -1,0 +1,176 @@
+use nom::bytes::complete::{tag, take_till};
+use nom::character::complete::char;
+use nom::sequence::separated_pair;
+use nom::IResult;
+use std::ops::{Add, Mul};
+
+#[derive(Hash, Eq, PartialEq, Copy, Clone, Debug)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+impl Point {
+    pub fn new(x: i32, y: i32) -> Self {
+        Self { x, y }
+    }
+}
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+impl Mul<i32> for Point {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
+    }
+}
+
+fn pos_delta_signum(a: Point, b: Point) -> Point {
+    Point::new((a.x - b.x).signum(), (a.y - b.y).signum())
+}
+
+impl Point {
+    fn parse_point(i: &str) -> IResult<&str, Self> {
+        let (i, _) = take_till(|c| c == '=')(i)?;
+        let (i, _) = char('=')(i)?;
+        let (i, (x, y)) = separated_pair(
+            nom::character::complete::i32,
+            tag(","),
+            nom::character::complete::i32,
+        )(i)?;
+
+        Ok((i, Self { x, y }))
+    }
+}
+
+fn parse_points(i: &str) -> IResult<&str, (Point, Point)> {
+    separated_pair(Point::parse_point, tag(" "), Point::parse_point)(i)
+}
+
+fn modulo(i: i32, n: i32) -> i32 {
+    ((i % n) + n) % n
+}
+
+pub fn solve(content: &str, width: usize, height: usize, seconds: i32) -> usize {
+    // If we just look at x and y independently, then it makes sense to just wrap around in their respective dimensions
+
+    let mut quadrant_count = [0; 4];
+
+    let w_half = width / 2;
+    let h_half = height / 2;
+
+    let quadrant = |c: Point| -> Option<usize> {
+        if c.x == w_half as i32 || c.y == h_half as i32 {
+            None
+        } else {
+            let qx = if c.x < w_half as i32 { 0 } else { 1 };
+            let qy = if c.y < h_half as i32 { 0 } else { 1 };
+            Some(qx * 2 + qy)
+        }
+    };
+
+    let mut v: Vec<(Point, Point)> = content
+        .lines()
+        .map(|line| {
+            let (_, (a, v)) = parse_points(line).expect("Expected!");
+            (a, v)
+        })
+        .collect();
+
+    let simulate = |v: Vec<(Point, Point)>, seconds: i32| -> Vec<(Point, Point)> {
+        v.into_iter()
+            .map(|(a, v)| {
+                let mut c = a + (v * seconds);
+                c.x = modulo(c.x, width as i32);
+                c.y = modulo(c.y, height as i32);
+                (c, v)
+            })
+            .collect()
+    };
+
+    let draw = |v: &Vec<(Point, Point)>| -> Vec<Vec<char>> {
+        let mut grid = vec![vec!['.'; width]; height];
+
+        for (point, _) in v {
+            grid[point.y as usize][point.x as usize] = '#';
+        }
+
+        grid
+    };
+
+    let might_be_tree = |v: &Vec<Vec<char>>| -> bool {
+        let mut count_triangle = 0;
+        for i in 0..v.len() - 1 {
+            for j in 1..v[i].len() - 1 {
+                count_triangle += [(i, j), (i + 1, j), (i + 1, j - 1), (i + 1, j + 1)]
+                    .into_iter()
+                    .all(|(i, j)| v[i][j] == '#') as usize;
+            }
+        }
+        // maybe more conditions
+        if count_triangle > w_half {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    for seconds in (0..10000) {
+        v = simulate(v.clone(), 1);
+        let grid = draw(&v);
+
+        if might_be_tree(&grid) {
+            println!("t={}", seconds + 1);
+            for row in grid {
+                println!("{}", row.iter().collect::<String>());
+            }
+        }
+    }
+
+    dbg!(quadrant_count);
+
+    quadrant_count.into_iter().product()
+}
+
+pub fn run(content: &str) -> usize {
+    solve(content, 101, 103, 100)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    pub fn parsing() {
+        let (_, (a, b)) = parse_points("p=0,4 v=3,-3").expect("A");
+        assert_eq!(a, Point::new(0, 4));
+        assert_eq!(b, Point::new(3, -3));
+    }
+    #[test]
+    pub fn example() {
+        let content = r"p=0,4 v=3,-3
+p=6,3 v=-1,-3
+p=10,3 v=-1,2
+p=2,0 v=2,-1
+p=0,0 v=1,3
+p=3,0 v=-2,-2
+p=7,6 v=-1,-3
+p=3,0 v=-1,-2
+p=9,3 v=2,3
+p=7,3 v=-1,2
+p=2,4 v=2,-3
+p=9,5 v=-3,-3
+";
+        assert_eq!(12, solve(content, 11, 7, 100));
+    }
+}
