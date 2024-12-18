@@ -10,9 +10,9 @@ pub fn main() -> Result<()> {
         ".in"
     ];
     suffixes.iter().for_each(|&suffix| {
-        use adventofcode::y24::d17::run as run;
+        use adventofcode::y24::d18::run as run;
         const YEAR: u32 = 24;
-        const DAY: u32 = 17;
+        const DAY: u32 = 18;
         let file_name = format!("./inputs/y{YEAR}/{DAY}{suffix}");
         let input = read_to_string(&file_name);
         if let Ok(input) = input {
