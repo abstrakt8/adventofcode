@@ -4,9 +4,9 @@ use nom::character::complete::newline;
 use nom::multi::separated_list1;
 use nom::sequence::separated_pair;
 use nom::IResult;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::ops::Range;
-use fxhash::FxBuildHasher;
+use fxhash::{FxBuildHasher, FxHashSet};
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
 struct Point {
@@ -90,7 +90,7 @@ fn simulate(points: &Vec<Point>, width: usize, height: usize, take: usize) -> Op
         .iter()
         .take(take)
         .cloned()
-        .collect::<HashSet<Point>>();
+        .collect::<FxHashSet<Point>>();
 
     let mut bfs = BfsData::default();
     bfs.check_and_push(Point::new(0, 0), 0);
