@@ -6,6 +6,7 @@ use nom::sequence::separated_pair;
 use nom::IResult;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::ops::Range;
+use fxhash::FxBuildHasher;
 
 #[derive(Hash, Eq, PartialEq, Clone, Debug)]
 struct Point {
@@ -67,7 +68,7 @@ impl Point {
 
 #[derive(Default, Clone, Debug)]
 struct BfsData {
-    dist: HashMap<Point, u32>,
+    dist: HashMap<Point, u32, FxBuildHasher>,
     queue: VecDeque<Point>,
 }
 
@@ -130,15 +131,15 @@ pub fn solve2(content: &str, width: usize, height: usize) -> String {
             range = range.start..mid;
         }
     }
-    assert!(simulate(&points, width, height, range.start).is_none());
+    // assert!(simulate(&points, width, height, range.start).is_none());
     // We take n elements, but the n-th element is n-1
     let p = &points[range.start - 1];
     format!("{},{}", p.x, p.y)
 }
 
 pub fn run(content: &str) -> String {
-    solve1(content, 71, 71, 1024).to_string()
-    // solve2(content, 71, 71)
+    // solve1(content, 71, 71, 1024).to_string()
+    solve2(content, 71, 71)
 }
 
 #[cfg(test)]
