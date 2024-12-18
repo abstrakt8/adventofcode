@@ -216,7 +216,7 @@ mod tests {
 #################";
         let ans = run(content);
 
-        assert_eq!(ans.1, 64);
+        assert_eq!(ans, 64);
 
     }
 }
