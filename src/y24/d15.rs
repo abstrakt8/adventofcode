@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 #[derive(Debug, Copy, Clone)]
 enum Direction {
