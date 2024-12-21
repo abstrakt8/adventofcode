@@ -109,64 +109,64 @@ impl Cube {
     }
 
     pub fn handle_side(&mut self, origin: usize, origin_dir: Direction, cur: usize, cur_dir: Direction, reversed: bool) {
-        self.connect(origin, Some(cur), cur_dir);
-
-        for d in [1, 3] {
-            let dir = origin_dir.add(d);
-            
-
-        }
-
-        if let Some(side) = self.go(cur, origin_dir.left()) {
-            let mut dir = origin_dir.left();
-            if reversed {
-                dir = dir.reverse();
-            }
-            self.handle_side(origin, origin_dir, side, dir, reversed);
-        }
-
-
-        if let Some(opposite) = self.go(cur_cell, cur_dir)  {
-            self.handle_opposite(origin, opposite, cur_dir);
-        }
-
-        // We handle the sides when going to the right
-        let mut tmp_cell = cur_cell;
-        let mut tmp_dir = cur_dir;
-        for _ in 0..3 {
-            if let Some(next) = self.go(tmp_cell, cur_dir.right()) {
-                tmp_dir = tmp_dir.right();
-                tmp_cell = next;
-                self.connect(origin, Some(tmp_cell), tmp_dir);
-
-                if let Some(opposite) = self.go(tmp_cell, cur_dir) {
-                    self.handle_opposite(origin, opposite, tmp_dir)
-                }
-            }
-        }
-
-        let mut tmp_cell = cur_cell;
-        let mut tmp_dir = cur_dir;
-        for _ in 0..3 {
-            if let Some(next) = self.go(tmp_cell, cur_dir.left()) {
-                tmp_dir = tmp_dir.left();
-                tmp_cell = next;
-                self.connect(origin, Some(tmp_cell), tmp_dir);
-
-                if let Some(opposite) = self.go(tmp_cell, cur_dir) {
-                    self.handle_opposite(origin, opposite, tmp_dir)
-                }
-            }
-        }
+        // self.connect(origin, Some(cur), cur_dir);
+        // 
+        // for d in [1, 3] {
+        //     let dir = origin_dir.add(d);
+        //     
+        // 
+        // }
+        // 
+        // if let Some(side) = self.go(cur, origin_dir.left()) {
+        //     let mut dir = origin_dir.left();
+        //     if reversed {
+        //         dir = dir.reverse();
+        //     }
+        //     self.handle_side(origin, origin_dir, side, dir, reversed);
+        // }
+        // 
+        // 
+        // if let Some(opposite) = self.go(cur_cell, cur_dir)  {
+        //     self.handle_opposite(origin, opposite, cur_dir);
+        // }
+        // 
+        // // We handle the sides when going to the right
+        // let mut tmp_cell = cur_cell;
+        // let mut tmp_dir = cur_dir;
+        // for _ in 0..3 {
+        //     if let Some(next) = self.go(tmp_cell, cur_dir.right()) {
+        //         tmp_dir = tmp_dir.right();
+        //         tmp_cell = next;
+        //         self.connect(origin, Some(tmp_cell), tmp_dir);
+        // 
+        //         if let Some(opposite) = self.go(tmp_cell, cur_dir) {
+        //             self.handle_opposite(origin, opposite, tmp_dir)
+        //         }
+        //     }
+        // }
+        // 
+        // let mut tmp_cell = cur_cell;
+        // let mut tmp_dir = cur_dir;
+        // for _ in 0..3 {
+        //     if let Some(next) = self.go(tmp_cell, cur_dir.left()) {
+        //         tmp_dir = tmp_dir.left();
+        //         tmp_cell = next;
+        //         self.connect(origin, Some(tmp_cell), tmp_dir);
+        // 
+        //         if let Some(opposite) = self.go(tmp_cell, cur_dir) {
+        //             self.handle_opposite(origin, opposite, tmp_dir)
+        //         }
+        //     }
+        // }
     }
 
     pub fn process_neighbors(&mut self) {
         for i in 0..6 {
-            for &dir in Direction::VARIANTS {
-                if let Some(side) = self.go(i, dir) {
-                    self.handle_side(i, side, dir);
-                }
-            }
+            // for &dir in Direction::VARIANTS {
+            //     if let Some(side) = self.go(i, dir) {
+            //         self.handle_side(i, side, dir);
+            //     }
+            // }
         }
     }
 }
