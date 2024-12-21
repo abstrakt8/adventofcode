@@ -1,6 +1,6 @@
 use fxhash::FxHashMap;
 use std::cmp::{min, Ordering};
-use std::collections::{BinaryHeap, HashMap, VecDeque};
+use std::collections::{BinaryHeap, HashMap};
 use strum::VariantArray;
 
 #[derive(Clone, Debug, PartialEq, Hash, Eq, Copy, VariantArray)]
@@ -10,6 +10,7 @@ enum Direction {
     UP = 2,
     DOWN = 3,
 }
+
 const DIRECTIONS: [[isize; 2]; 4] = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
@@ -42,8 +43,6 @@ const NUMBER_PAD: [[Field; 3]; 4] = [
     [Field::Empty, Field::Number(0), Field::Number(10)],    //
 ];
 
-const FIELDS: [[[Field; 3]; 4]; 1 + 1] = [DIRECTIONAL_PAD, NUMBER_PAD];
-
 #[derive(Clone, Debug, Default, PartialEq, Hash, Eq)]
 struct Pos {
     row: usize,
@@ -67,15 +66,11 @@ struct State {
     pos: [Pos; 2],
     idx: usize,
 }
+
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 enum InputData {
     PressA,
     Direction(Direction),
-}
-
-struct ReconstructData {
-    prev: State,
-    direction: InputData,
 }
 
 #[derive(Default, Debug)]
@@ -113,7 +108,7 @@ struct DijkstraData {
 impl DijkstraData {
     pub fn check_and_push(&mut self, state: State, dist: u64) {
         let mut better = true;
-        if let Some(best_seen) =  self.seen.get(&state) {
+        if let Some(best_seen) = self.seen.get(&state) {
             better = dist < *best_seen;
         }
         if better {
@@ -121,10 +116,6 @@ impl DijkstraData {
             self.queue.push(HeapData { state, dist });
         }
     }
-}
-
-fn hamilton(a: &Pos, b: &Pos) -> usize {
-    (a.row.abs_diff(b.row)) + a.col.abs_diff(b.col)
 }
 
 fn go(pos: Pos, grid: &[[Field; 3]; 4], d: Direction) -> Option<Pos> {
@@ -139,28 +130,25 @@ fn go(pos: Pos, grid: &[[Field; 3]; 4], d: Direction) -> Option<Pos> {
     }
 }
 
-pub fn solve(input: &[u8], num_directional: usize) -> u64 {
+fn parse_input(input: &[u8]) -> (usize, Vec<u8>) {
     let input: Vec<u8> = input
         .iter()
-        .map(|d| if d.is_ascii_digit() { *d - b'0' } else { 10 })
+        .map(|&d| if d.is_ascii_digit() { d - b'0' } else { 10 })
         .collect();
+
     let mut number = 0usize;
-    for i in &input {
-        if *i < 10 {
-            number = number * 10 + (*i as usize);
+    for &i in &input {
+        if i < 10 {
+            number = number * 10 + (i as usize);
         }
     }
+
+    (number, input)
+}
+
+pub fn solve(input: &[u8], num_directional: usize) -> u64 {
+    let (number, input) = parse_input(input);
     let directional_a_pos = Pos::new(0, 2);
-
-    // Ignore 0
-    let mut cost = vec![vec![vec![0u64; 6]; 6]; num_directional + 1];
-
-    // Base case: Human layer
-    for i in 1..6 {
-        for j in 1..6 {
-            cost[0][i][j] = 1;
-        }
-    }
 
     let mut field_pos: HashMap<Field, Pos> = Default::default();
     for i in 0..2 {
@@ -171,16 +159,31 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
 
     let field_pos = |field: Field| -> Pos { field_pos.get(&field).unwrap().clone() };
 
-    // Cost[i][a][b] = Cost to go from a to b in layer i and then press activate 'b', when last activated 'a'
+    // SOLUTION:
+    // We want to find the cost of moving from a certain key to another key within layer i, we can
+    // define it as followed:
+    // Cost[i][a][b] = Cost to go from 'a' to 'b' in layer i and then activate 'b'. We also last activated 'a'.
     //                 This means i-1's last position was A and will end at A which will simplify things
-    // Cost[i][<][>] = (Cost[i-1][A][>] + 1) + (Cost[i-1][>][>] + 1) + (Cost[i-1][>][A] + 1)
     // Some base cases:
-    // Cost[0][*][*] = 0 -> Human layer has no movement cost basically, just press it
-    // Cost[i][a][a] = 1
+    // Cost[0][*][*] = 0 -> Human layer has no movement cost
+    // Cost[i][a][a] = 1 -> There is no cost to move from a position to the same position
 
-    // Numerical pad
-    // Dijkstra, but the cost of moving to a direction lets say >, when last direction was <:
-    // -> Cost[n][<][>]
+    // Example:
+    // Cost[i][<][>] = (Cost[i-1][A][>] + 1) + (Cost[i-1][>][>] + 1) + (Cost[i-1][>][A] + 1)
+    // To define a formula for each would be too much, we can just use shortest path algorithm
+    // to calculate these costs.
+
+    // Now to find the shortest path to help the bot in the numerical pad, we can just maintain
+    // the position of the last directional pad 'prev' and the current position in the numerical pad 'cur'.
+    // Example: The cost to move > is just Cost[last][prev][>]
+
+    let mut cost = vec![vec![vec![0u64; 6]; 6]; num_directional + 1];
+    // Base case: Human layer
+    for i in 1..6 {
+        for j in 1..6 {
+            cost[0][i][j] = 1;
+        }
+    }
     for layer in 1..cost.len() {
         for start in 1..6 {
             for end in 1..6 {
@@ -201,20 +204,20 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
                         Pos::from_directional_index(start),
                     ],
                 },
-                0, // The cost for activating
+                0, // Unused
             );
 
             while let Some(front) = dijk.queue.pop() {
                 let [prev, cur] = &front.state.pos;
                 let dist = *dijk.seen.get(&front.state).unwrap();
-                
+
                 if front.dist != dist {
                     continue;
                 }
 
                 cost[layer][start][cur.dir_idx()] = min(
                     cost[layer][start][cur.dir_idx()],
-                    dist + cost[layer - 1][prev.dir_idx()][field_pos(Field::Activate).dir_idx()]
+                    dist + cost[layer - 1][prev.dir_idx()][field_pos(Field::Activate).dir_idx()],
                 );
 
                 for d in Direction::VARIANTS {
@@ -251,11 +254,11 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
     while let Some(front) = dijk.queue.pop() {
         let state = front.state;
         let dist = *dijk.seen.get(&state).unwrap();
-        
+
         if front.dist != dist {
             continue;
         }
-        
+
         if state.idx == input.len() {
             shortest_path = Some(dist);
             break;
@@ -289,8 +292,7 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
     }
 
     let dist = shortest_path.unwrap();
-    let ans1 = dist * (number as u64);
-    ans1
+    dist * (number as u64)
 }
 
 pub fn run(content: &str) -> (u64, u64) {
