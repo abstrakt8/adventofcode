@@ -1,5 +1,6 @@
 use fxhash::FxHashMap;
-use std::collections::{HashSet, VecDeque};
+use std::cmp::{min, Ordering};
+use std::collections::{BinaryHeap, HashMap, VecDeque};
 use strum::VariantArray;
 
 #[derive(Clone, Debug, PartialEq, Hash, Eq, Copy, VariantArray)]
@@ -41,9 +42,9 @@ const NUMBER_PAD: [[Field; 3]; 4] = [
     [Field::Empty, Field::Number(0), Field::Number(10)],    //
 ];
 
-const FIELDS: [[[Field; 3]; 4]; 2 + 1] = [DIRECTIONAL_PAD, DIRECTIONAL_PAD, NUMBER_PAD];
+const FIELDS: [[[Field; 3]; 4]; 1 + 1] = [DIRECTIONAL_PAD, NUMBER_PAD];
 
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Hash, Eq)]
 struct Pos {
     row: usize,
     col: usize,
@@ -53,14 +54,20 @@ impl Pos {
     pub fn new(row: usize, col: usize) -> Self {
         Self { row, col }
     }
+    pub fn from_directional_index(idx: usize) -> Self {
+        Self::new(idx / 3, idx % 3)
+    }
+    pub fn dir_idx(&self) -> usize {
+        self.row * 3 + self.col
+    }
 }
 
-#[derive(Clone, Debug, PartialEq, Hash, Eq)]
+#[derive(Clone, Default, Debug, PartialEq, Hash, Eq)]
 struct State {
-    pos: [Pos; 2 + 1],
+    pos: [Pos; 2],
     idx: usize,
 }
-
+#[derive(Clone, Debug, PartialEq, Hash, Eq)]
 enum InputData {
     PressA,
     Direction(Direction),
@@ -71,26 +78,43 @@ struct ReconstructData {
     direction: InputData,
 }
 
-#[derive(Default)]
-struct BfsData {
-    seen: FxHashMap<State, usize>,
-    prev: FxHashMap<State, ReconstructData>,
-    queue: VecDeque<State>,
+#[derive(Default, Debug)]
+struct HeapData {
+    state: State,
+    dist: u64,
 }
 
-impl BfsData {
-    pub fn check_and_push(
-        &mut self,
-        state: State,
-        dist: usize,
-        reconstruct_data: Option<ReconstructData>,
-    ) {
+impl Eq for HeapData {}
+
+impl PartialEq<Self> for HeapData {
+    fn eq(&self, other: &Self) -> bool {
+        self.cmp(other).is_eq()
+    }
+}
+
+impl PartialOrd<Self> for HeapData {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for HeapData {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.dist.cmp(&other.dist).reverse()
+    }
+}
+
+#[derive(Default)]
+struct DijkstraData {
+    seen: FxHashMap<State, u64>,
+    queue: BinaryHeap<HeapData>,
+}
+
+impl DijkstraData {
+    pub fn check_and_push(&mut self, state: State, dist: u64) {
         if !self.seen.contains_key(&state) {
             self.seen.insert(state.clone(), dist);
-            if let Some(reconstruct_data) = reconstruct_data {
-                self.prev.insert(state.clone(), reconstruct_data);
-            }
-            self.queue.push_back(state);
+            self.queue.push(HeapData { state, dist });
         }
     }
 }
@@ -111,153 +135,197 @@ fn go(pos: Pos, grid: &[[Field; 3]; 4], d: Direction) -> Option<Pos> {
     }
 }
 
-pub fn solve(input: &[u8]) -> usize {
-    let mut bfs = BfsData::default();
-
+pub fn solve(input: &[u8], num_directional: usize) -> u64 {
     let input: Vec<u8> = input
         .iter()
         .map(|d| if d.is_ascii_digit() { *d - b'0' } else { 10 })
         .collect();
-
     let mut number = 0usize;
     for i in &input {
         if *i < 10 {
             number = number * 10 + (*i as usize);
         }
     }
+    let directional_a_pos = Pos::new(0, 2);
 
-    let dir_pad_A_pos = Pos::new(0, 2);
+    // Ignore 0
+    let mut cost = vec![vec![vec![0u64; 6]; 6]; num_directional + 1];
 
-    bfs.check_and_push(
-        State {
-            pos: [dir_pad_A_pos.clone(), dir_pad_A_pos.clone(), Pos::new(3, 2)],
-            idx: 0,
-        },
-        0,
-        None,
-    );
-
-    let mut ans1 = 0;
-    while let Some(front) = bfs.queue.pop_front() {
-        let dist = *bfs.seen.get(&front).unwrap();
-        if front.idx == input.len() {
-            ans1 = dist * (number);
-            break;
+    // Base case: Human layer
+    for i in 1..6 {
+        for j in 1..6 {
+            cost[0][i][j] = 1;
         }
+    }
 
-        // Press arrow, not so interesting
-        for d in Direction::VARIANTS {
-            let Some(p) = go(front.pos[0].clone(), &FIELDS[0], *d) else {
-                continue;
-            };
-            let mut new_state = front.clone();
-            new_state.pos[0] = p;
-            bfs.check_and_push(
-                new_state,
-                dist + 1,
-                Some(ReconstructData {
-                    prev: front.clone(),
-                    direction: InputData::Direction(*d),
-                }),
-            );
+    let mut field_pos: HashMap<Field, Pos> = Default::default();
+    for i in 0..2 {
+        for j in 0..3 {
+            field_pos.insert(DIRECTIONAL_PAD[i][j].clone(), Pos::new(i, j));
         }
+    }
 
-        // Press A, potential chain reactions
+    let field_pos = |field: Field| -> Pos { field_pos.get(&field).unwrap().clone() };
 
-        'press_a: {
-            let mut new_state = front.clone();
-            for i in 0..2 + 1 {
-                let p = &front.pos[i];
+    // Cost[i][a][b] = Cost to go from a to b in layer i and then press activate 'b', when last activated 'a'
+    //                 This means i-1's last position was A and will end at A which will simplify things
+    // Cost[i][<][>] = (Cost[i-1][A][>] + 1) + (Cost[i-1][>][>] + 1) + (Cost[i-1][>][A] + 1)
+    // Some base cases:
+    // Cost[0][*][*] = 0 -> Human layer has no movement cost basically, just press it
+    // Cost[i][a][a] = 1
 
-                match &FIELDS[i][p.row][p.col] {
-                    Field::Direction(d) => {
-                        let Some(pos) = go(front.pos[i + 1].clone(), &FIELDS[i + 1], *d) else {
-                            break 'press_a;
-                        };
-                        new_state.pos[i + 1] = pos;
-                        break;
-                    }
-                    Field::Number(n) => {
-                        if *n != input[new_state.idx] {
-                            break 'press_a;
-                        }
-                        new_state.idx += 1;
-                        break;
-                    }
-                    Field::Activate => {
-                        continue;
-                    }
-                    Field::Empty => {
-                        unreachable!("Should not reach empty")
-                    }
+    // Numerical pad
+    // Dijkstra, but the cost of moving to a direction lets say >, when last direction was <:
+    // -> Cost[n][<][>]
+    for layer in 1..cost.len() {
+        for start in 1..6 {
+            for end in 1..6 {
+                if end == start {
+                    // Base case
+                    cost[layer][start][end] = 1;
+                } else {
+                    cost[layer][start][end] = u64::MAX;
                 }
             }
 
-            bfs.check_and_push(
-                new_state,
-                dist + 1,
-                Some(ReconstructData {
-                    prev: front.clone(),
-                    direction: InputData::PressA,
-                }),
+            let mut dijk = DijkstraData::default();
+            dijk.check_and_push(
+                State {
+                    idx: 0,
+                    pos: [
+                        directional_a_pos.clone(),
+                        Pos::from_directional_index(start),
+                    ],
+                },
+                0, // The cost for activating
             );
-        }
-    }
 
+            while let Some(front) = dijk.queue.pop() {
+                let [prev, cur] = &front.state.pos;
+                let dist = *dijk.seen.get(&front.state).unwrap();
 
+                cost[layer][start][cur.dir_idx()] = min(
+                    cost[layer][start][cur.dir_idx()],
+                    dist + cost[layer - 1][prev.dir_idx()][field_pos(Field::Activate).dir_idx()]
+                );
 
-    // Ignore 0
-    let mut dp = vec![vec![0u64; 6]; 23];
+                for d in Direction::VARIANTS {
+                    let Some(new_cur) = go(cur.clone(), &DIRECTIONAL_PAD, *d) else {
+                        continue;
+                    };
+                    let new_prev = field_pos(Field::Direction(*d));
+                    let new_cost = dist + cost[layer - 1][prev.dir_idx()][new_prev.dir_idx()];
 
-    let inputs_required = vec![
-        // 0: Empty
-        vec![],
-        // 1: ^
-        vec![Direction::LEFT, Direction::RIGHT],
-        // 2: A
-        vec![],
-        // 3: <
-        vec![
-            Direction::LEFT,
-            Direction::DOWN,
-            Direction::LEFT,
-            Direction::RIGHT,
-            Direction::UP,
-            Direction::RIGHT,
-        ],
-        // 4: v
-        vec![
-            Direction::LEFT,
-            Direction::DOWN,
-            Direction::RIGHT,
-            Direction::UP,
-        ],
-        // 5: >
-        vec![Direction::DOWN, Direction::UP],
-    ];
-
-    let mapping: [usize; 4] = [3, 5, 1, 4];
-
-    for i in 0..4 {
-        dp[0][mapping[i]] = inputs_required[mapping[i]].len() as u64 + 1;
-    }
-    for i in 1..dp.len() {
-        for j in 0..4 {
-            dp[i][j] = 1;
-            for k in &inputs_required[mapping[j]] {
-                let k_mapping = mapping[*k as usize];
-                dp[i][j] += dp[i - 1][k_mapping];
+                    dijk.check_and_push(
+                        State {
+                            pos: [new_prev.clone(), new_cur],
+                            idx: 0,
+                        },
+                        new_cost,
+                    );
+                }
             }
         }
     }
 
+    // let mut dp = vec![vec![0u64; 4]; num_directional];
+
+    // let inputs_required = [
+    //     // 3: <
+    //     vec![
+    //         Direction::DOWN,
+    //         Direction::LEFT,
+    //         Direction::LEFT,
+    //         Direction::RIGHT,
+    //         Direction::RIGHT,
+    //         Direction::UP,
+    //     ],
+    //     // 5: >
+    //     vec![Direction::DOWN, Direction::UP],
+    //     // 1: ^
+    //     vec![Direction::LEFT, Direction::RIGHT],
+    //     // 4: v
+    //     vec![
+    //         Direction::DOWN,
+    //         Direction::LEFT,
+    //         Direction::RIGHT,
+    //         Direction::UP,
+    //     ],
+    // ];
+
+    // Doesn't matter where we stand at the end
+    // for i in 0..4 {
+    //     dp[0][i] = inputs_required[i].len() as u64 + 1;
+    // }
+    // for i in 2..dp.len() {
+    //     for j in 0..4 {
+    //         dp[i][j] = 1;
+    //         for k in &inputs_required[j] {
+    //             dp[i][j] += dp[i - 1][*k as usize];
+    //         }
+    //     }
+    // }
+    // let dp = &dp[dp.len() - 2];
+
+    let mut dijk = DijkstraData::default();
+
+    dijk.check_and_push(
+        State {
+            pos: [directional_a_pos.clone(), Pos::new(3, 2)],
+            idx: 0,
+        },
+        0,
+    );
+
+    let cost = &cost[cost.len() - 1];
+    let mut shortest_path = None;
+    while let Some(front) = dijk.queue.pop() {
+        let state = front.state;
+        let dist = *dijk.seen.get(&state).unwrap();
+        if state.idx == input.len() {
+            shortest_path = Some(dist);
+            break;
+        }
+
+        let [prev, cur] = state.pos.clone();
+
+        // Press arrow in the last directional pad
+        for d in Direction::VARIANTS {
+            let Some(new_cur) = go(cur.clone(), &NUMBER_PAD, *d) else {
+                continue;
+            };
+            let new_prev = field_pos(Field::Direction(*d));
+            let new_dist = dist + cost[prev.dir_idx()][new_prev.dir_idx()];
+
+            let mut new_state = state.clone();
+            new_state.pos = [new_prev, new_cur];
+            dijk.check_and_push(new_state, new_dist);
+        }
+
+        // Press A in last directional pad, only makes sense if cur is at the number we want
+        if matches!(&NUMBER_PAD[cur.row][cur.col], Field::Number(n) if *n == input[state.idx]) {
+            let new_prev = field_pos(Field::Activate);
+            let new_dist = dist + cost[prev.dir_idx()][new_prev.dir_idx()];
+            let new_state = State {
+                pos: [new_prev, cur],
+                idx: state.idx + 1,
+            };
+            dijk.check_and_push(new_state, new_dist);
+        }
+    }
+
+    let dist = shortest_path.unwrap();
+    let ans1 = dist * (number as u64);
     ans1
 }
 
-pub fn run(content: &str) -> usize {
+pub fn run(content: &str) -> (u64, u64) {
     let inputs: Vec<&[u8]> = content.lines().map(&str::as_bytes).collect();
 
-    inputs.into_iter().map(solve).sum()
+    let ans1 = inputs.iter().map(|b| solve(b, 2)).sum();
+    let ans2 = inputs.iter().map(|b| solve(b, 25)).sum();
+
+    (ans1, ans2)
 }
 
 #[cfg(test)]
