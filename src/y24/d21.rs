@@ -112,7 +112,11 @@ struct DijkstraData {
 
 impl DijkstraData {
     pub fn check_and_push(&mut self, state: State, dist: u64) {
-        if !self.seen.contains_key(&state) {
+        let mut better = true;
+        if let Some(best_seen) =  self.seen.get(&state) {
+            better = dist < *best_seen;
+        }
+        if better {
             self.seen.insert(state.clone(), dist);
             self.queue.push(HeapData { state, dist });
         }
@@ -203,6 +207,10 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
             while let Some(front) = dijk.queue.pop() {
                 let [prev, cur] = &front.state.pos;
                 let dist = *dijk.seen.get(&front.state).unwrap();
+                
+                if front.dist != dist {
+                    continue;
+                }
 
                 cost[layer][start][cur.dir_idx()] = min(
                     cost[layer][start][cur.dir_idx()],
@@ -228,45 +236,6 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
         }
     }
 
-    // let mut dp = vec![vec![0u64; 4]; num_directional];
-
-    // let inputs_required = [
-    //     // 3: <
-    //     vec![
-    //         Direction::DOWN,
-    //         Direction::LEFT,
-    //         Direction::LEFT,
-    //         Direction::RIGHT,
-    //         Direction::RIGHT,
-    //         Direction::UP,
-    //     ],
-    //     // 5: >
-    //     vec![Direction::DOWN, Direction::UP],
-    //     // 1: ^
-    //     vec![Direction::LEFT, Direction::RIGHT],
-    //     // 4: v
-    //     vec![
-    //         Direction::DOWN,
-    //         Direction::LEFT,
-    //         Direction::RIGHT,
-    //         Direction::UP,
-    //     ],
-    // ];
-
-    // Doesn't matter where we stand at the end
-    // for i in 0..4 {
-    //     dp[0][i] = inputs_required[i].len() as u64 + 1;
-    // }
-    // for i in 2..dp.len() {
-    //     for j in 0..4 {
-    //         dp[i][j] = 1;
-    //         for k in &inputs_required[j] {
-    //             dp[i][j] += dp[i - 1][*k as usize];
-    //         }
-    //     }
-    // }
-    // let dp = &dp[dp.len() - 2];
-
     let mut dijk = DijkstraData::default();
 
     dijk.check_and_push(
@@ -282,6 +251,11 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
     while let Some(front) = dijk.queue.pop() {
         let state = front.state;
         let dist = *dijk.seen.get(&state).unwrap();
+        
+        if front.dist != dist {
+            continue;
+        }
+        
         if state.idx == input.len() {
             shortest_path = Some(dist);
             break;
