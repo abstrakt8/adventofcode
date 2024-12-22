@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::iter::{once, repeat_with};
+use fxhash::{FxBuildHasher, FxHashMap};
 
 fn mix(a: u32, b: u32) -> u32 {
     a ^ b
@@ -56,7 +57,7 @@ impl Solver {
             let mut seq = Vec::new();
 
             for (i, s) in secrets.iter().enumerate() {
-                let cur = (*s % 10);
+                let cur = *s % 10;
                 if i > 0 {
                     let d = (cur as i32) - (prev as i32);
                     seq.push(d);
@@ -80,6 +81,42 @@ impl Solver {
 
         *global.values().max().unwrap()
     }
+
+    pub fn part2_fast(&self) -> u32 {
+        const MAX_VARIANTS: usize = 19*19*19*19;
+        let mut global = FxHashMap::<u32, u32>::with_capacity_and_hasher(MAX_VARIANTS, FxBuildHasher::default());
+        let mut local = FxHashMap::<u32, u32>::with_capacity_and_hasher(MAX_VARIANTS, FxBuildHasher::default());
+
+        for secrets in self.data.iter() {
+            let mut prev = 0;
+            let mut id = 0;
+            for (i, s) in secrets.iter().enumerate() {
+                let cur = *s % 10;
+                if i > 0 {
+                    let d = (cur + 9) - prev;
+
+                    id = id % (19 * 19 * 19);
+                    id = id * 19 + d;
+
+                    if i >= 4 {
+                        local.entry(id).or_insert(cur);
+                    }
+
+                }
+                prev = cur;
+            }
+
+            for (&def, &max_val) in &local {
+                global
+                    .entry(def)
+                    .and_modify(|v| *v += max_val)
+                    .or_insert(max_val);
+            }
+            local.clear();
+        }
+
+        *global.values().max().unwrap()
+    }
 }
 
 pub fn run1(content: &str) -> u64 {
@@ -92,9 +129,14 @@ pub fn run2(content: &str) -> u32 {
     solver.part2()
 }
 
+pub fn run2_fast(content: &str) -> u32 {
+    let solver = Solver::from_input(content);
+    solver.part2_fast()
+}
+
 pub fn run(content: &str) -> impl Debug {
     let solver = Solver::from_input(content);
     let ans1 = solver.part1();
     let ans2 = solver.part2();
-    (ans1, ans2)
+    (ans1, ans2, solver.part2_fast())
 }
