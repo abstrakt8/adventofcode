@@ -232,13 +232,10 @@ pub fn run2(content: &str) -> usize {
     print(&grid);
 
 
-    let box1 = coutn_boxes(&grid);
     for byte in moves {
         let d = Direction::from(byte);
-        // print(&grid);
         let mut new_grid = grid.clone();
         let mut seen = HashMap::new();
-        // let mut processed = HashSet::new();
         if can_move(
             &grid,
             &mut new_grid,
@@ -250,21 +247,6 @@ pub fn run2(content: &str) -> usize {
             pos = go(pos, d);
             grid = new_grid;
         }
-
-        // for i in 0..grid.len() {
-        //     for j in 1..grid[i].len() {
-        //         if (new_grid[i][j] == BOX2) ^ (new_grid[i][j - 1] == BOX1) {
-        //             println!("{}", byte as char);
-        //             print(&grid);
-        //             print(&new_grid);
-        // 
-        //             panic!()
-        //         };
-        //     }
-        // }
-        // if box1 != coutn_boxes(&new_grid) {
-        //     panic!("boxes not same");
-        // }
     }
 
     print(&grid);

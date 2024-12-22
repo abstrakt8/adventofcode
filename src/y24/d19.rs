@@ -1,4 +1,6 @@
-pub fn run(content: &str) -> i64 {
+use std::fmt::Debug;
+
+pub fn run(content: &str) -> impl Debug {
     let (patterns, desired) = content.trim().split_once("\n\n").unwrap();
     let patterns: Vec<&str> = patterns.split(", ").collect();
     let desired_design: Vec<&str> = desired.split("\n").collect();
@@ -22,5 +24,5 @@ pub fn run(content: &str) -> i64 {
         ans1 += (dp[design.len()] > 0) as i64;
         ans2 += dp[design.len()];
     }
-    ans1
+    (ans1, ans2)
 }
