@@ -86,8 +86,8 @@ impl Solver {
     pub fn part2_fast<T: BuildHasher>(&self, hasher: impl Fn() -> T) -> u32 {
         const MAX_VARIANTS: usize = 19*19*19*19;
 
-        let mut global = HashMap::<u32, u32, _>::with_capacity_and_hasher(MAX_VARIANTS, hasher());
-        let mut local = HashMap::<u32, u32, _>::with_capacity_and_hasher(MAX_VARIANTS, hasher());
+        let mut global = HashMap::<u32, u32, _>::with_capacity_and_hasher(2000, hasher());
+        let mut local = HashMap::<u32, u32, _>::with_capacity_and_hasher(2000, hasher());
 
         for secrets in self.data.iter() {
             let mut prev = 0;
