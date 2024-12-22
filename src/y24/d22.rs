@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::hash::{BuildHasher, DefaultHasher, Hasher};
 use std::iter::{once, repeat_with};
 use fxhash::{FxBuildHasher, FxHashMap};
 
@@ -82,10 +83,11 @@ impl Solver {
         *global.values().max().unwrap()
     }
 
-    pub fn part2_fast(&self) -> u32 {
+    pub fn part2_fast<T: BuildHasher>(&self, hasher: impl Fn() -> T) -> u32 {
         const MAX_VARIANTS: usize = 19*19*19*19;
-        let mut global = FxHashMap::<u32, u32>::with_capacity_and_hasher(MAX_VARIANTS, FxBuildHasher::default());
-        let mut local = FxHashMap::<u32, u32>::with_capacity_and_hasher(MAX_VARIANTS, FxBuildHasher::default());
+
+        let mut global = HashMap::<u32, u32, _>::with_capacity_and_hasher(MAX_VARIANTS, hasher());
+        let mut local = HashMap::<u32, u32, _>::with_capacity_and_hasher(MAX_VARIANTS, hasher());
 
         for secrets in self.data.iter() {
             let mut prev = 0;
@@ -129,14 +131,15 @@ pub fn run2(content: &str) -> u32 {
     solver.part2()
 }
 
-pub fn run2_fast(content: &str) -> u32 {
+pub fn run2_fast<T: BuildHasher>(content: &str, hasher: impl Fn() -> T) -> u32 {
     let solver = Solver::from_input(content);
-    solver.part2_fast()
+    solver.part2_fast(hasher)
 }
 
 pub fn run(content: &str) -> impl Debug {
     let solver = Solver::from_input(content);
     let ans1 = solver.part1();
     let ans2 = solver.part2();
-    (ans1, ans2, solver.part2_fast())
+    let ans2_fast = solver.part2_fast(|| FxBuildHasher::default());
+    (ans1, ans2, ans2_fast)
 }
