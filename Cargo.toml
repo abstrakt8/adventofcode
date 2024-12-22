@@ -8,12 +8,9 @@ edition = "2021"
 [dependencies]
 
 regex = "1.10.2"
-lazy_static = "1.4.0"
 num = "0.4.1"
-log = "0.4.20"
 itertools = "0.13.0"
 serde = { version = "1.0.196", features = ["derive"] }
-enum-map = "2.7.3"
 color-eyre = "0.6.2"
 rayon = "1.10.0"
 memchr = "2.7.4"
@@ -28,7 +25,6 @@ strum = { version = "0.26.3", features = ["derive"] }
 dead_code = { level = "allow" }
 
 [dev-dependencies]
-rstest = "0.23.0"
 divan = "0.1.16"
 
 [[bench]]
@@ -45,4 +41,8 @@ harness = false
 
 [[bench]]
 name = "y24_p7"
+harness = false
+
+[[bench]]
+name = "y24_d22"
 harness = false
