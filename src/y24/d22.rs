@@ -1,8 +1,7 @@
+use fxhash::FxBuildHasher;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::hash::{BuildHasher, DefaultHasher, Hasher};
-use std::iter::{once, repeat_with};
-use fxhash::{FxBuildHasher, FxHashMap};
+use std::hash::BuildHasher;
 
 fn mix(a: u32, b: u32) -> u32 {
     a ^ b
@@ -25,22 +24,19 @@ struct Solver {
 
 impl Solver {
     pub fn from_input(content: &str) -> Self {
-        let initial: Vec<u32> = content.lines().filter_map(|s| s.parse().ok()).collect();
-
-        let data: Vec<Vec<_>> = initial
-            .into_iter()
-            .map(|mut s| {
-                once(s)
-                    .chain(
-                        repeat_with(move || {
-                            s = next_secret(s);
-                            s
-                        })
+        let mut data = Vec::with_capacity(2024);
+        for line in content.lines() {
+            if let Ok(initial) = line.parse::<u32>() {
+                let mut vec = Vec::with_capacity(2001);
+                vec.push(initial);
+                vec.extend(
+                    std::iter::successors(Some(initial), |&s| Some(next_secret(s)))
+                        .skip(1)
                         .take(2000),
-                    )
-                    .collect::<Vec<_>>()
-            })
-            .collect();
+                );
+                data.push(vec);
+            }
+        }
 
         Self { data }
     }
@@ -84,7 +80,7 @@ impl Solver {
     }
 
     pub fn part2_fast<T: BuildHasher>(&self, hasher: impl Fn() -> T) -> u32 {
-        const MAX_VARIANTS: usize = 19*19*19*19;
+        const MAX_VARIANTS: usize = 19 * 19 * 19 * 19;
 
         let mut global = HashMap::<u32, u32, _>::with_capacity_and_hasher(2000, hasher());
         let mut local = HashMap::<u32, u32, _>::with_capacity_and_hasher(2000, hasher());
@@ -103,7 +99,6 @@ impl Solver {
                     if i >= 4 {
                         local.entry(id).or_insert(cur);
                     }
-
                 }
                 prev = cur;
             }
