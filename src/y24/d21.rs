@@ -1,9 +1,8 @@
 use fxhash::FxHashMap;
 use std::cmp::{min, Ordering};
 use std::collections::{BinaryHeap, HashMap};
-use strum::VariantArray;
 
-#[derive(Clone, Debug, PartialEq, Hash, Eq, Copy, VariantArray)]
+#[derive(Clone, Debug, PartialEq, Hash, Eq, Copy)]
 enum Direction {
     LEFT = 0,
     RIGHT = 1,
@@ -11,6 +10,7 @@ enum Direction {
     DOWN = 3,
 }
 
+const DIRECTION_VARIANTS: [Direction; 4] = [Direction::LEFT, Direction::RIGHT, Direction::UP, Direction::DOWN];
 const DIRECTIONS: [[isize; 2]; 4] = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
@@ -130,16 +130,16 @@ fn go(pos: Pos, grid: &[[Field; 3]; 4], d: Direction) -> Option<Pos> {
     }
 }
 
-fn parse_input(input: &[u8]) -> (usize, Vec<u8>) {
+fn parse_input(input: &[u8]) -> (u64, Vec<u8>) {
     let input: Vec<u8> = input
         .iter()
         .map(|&d| if d.is_ascii_digit() { d - b'0' } else { 10 })
         .collect();
 
-    let mut number = 0usize;
+    let mut number = 0;
     for &i in &input {
         if i < 10 {
-            number = number * 10 + (i as usize);
+            number = number * 10 + (i as u64);
         }
     }
 
@@ -220,7 +220,7 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
                     dist + cost[layer - 1][prev.dir_idx()][field_pos(Field::Activate).dir_idx()],
                 );
 
-                for d in Direction::VARIANTS {
+                for d in &DIRECTION_VARIANTS {
                     let Some(new_cur) = go(cur.clone(), &DIRECTIONAL_PAD, *d) else {
                         continue;
                     };
@@ -267,7 +267,7 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
         let [prev, cur] = state.pos.clone();
 
         // Press arrow in the last directional pad
-        for d in Direction::VARIANTS {
+        for d in &DIRECTION_VARIANTS {
             let Some(new_cur) = go(cur.clone(), &NUMBER_PAD, *d) else {
                 continue;
             };
@@ -292,17 +292,22 @@ pub fn solve(input: &[u8], num_directional: usize) -> u64 {
     }
 
     let dist = shortest_path.unwrap();
-    dist * (number as u64)
+    dist * number
 }
-
-pub fn run(content: &str) -> (u64, u64) {
+pub fn run(content: &str) -> u64 {
     let inputs: Vec<&[u8]> = content.lines().map(&str::as_bytes).collect();
 
-    let ans1 = inputs.iter().map(|b| solve(b, 2)).sum();
-    let ans2 = inputs.iter().map(|b| solve(b, 25)).sum();
-
-    (ans1, ans2)
+    inputs.iter().map(|b| solve(b, 25)).sum()
 }
+
+// pub fn run(content: &str) -> (u64, u64) {
+//     let inputs: Vec<&[u8]> = content.lines().map(&str::as_bytes).collect();
+//
+//     let ans1 = inputs.iter().map(|b| solve(b, 2)).sum();
+//     let ans2 = inputs.iter().map(|b| solve(b, 25)).sum();
+//
+//     (ans1, ans2)
+// }
 
 #[cfg(test)]
 mod tests {
