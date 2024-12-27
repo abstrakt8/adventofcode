@@ -1,7 +1,9 @@
+use std::cmp::PartialEq;
 use color_eyre::eyre::anyhow;
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, VecDeque};
+use std::mem::swap;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum Operation {
@@ -29,7 +31,7 @@ impl Operation {
     }
 }
 
-pub fn run(content: &str) -> u64 {
+pub fn run(content: &str) -> (u64, String) {
     let (initial_values, gates) = content.split_once("\n\n").unwrap();
 
     let mut values: HashMap<&str, u8> = initial_values
@@ -90,7 +92,10 @@ pub fn run(content: &str) -> u64 {
         }
     }
 
-    ans1
+    // Used d24.py with GraphViz and manually swapped them
+    let ans2 = [("z13", "npf"), ("z19", "cph"), ("hgj", "z33"), ("nnt", "gws")];
+    let ans2 = ans2.into_iter().map(|t| [t.0, t.1]).flatten().sorted().join(",");
+    (ans1, ans2)
 }
 
 #[test]
@@ -142,6 +147,6 @@ y03 OR x01 -> nrd
 hwm AND bqk -> z03
 tgd XOR rvg -> z12
 tnw OR pbm -> gnj";
-
-    assert_eq!(2024, run(content));
+    let (ans1, _) = run(content);
+    assert_eq!(2024, ans1);
 }
