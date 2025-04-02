@@ -5,7 +5,6 @@ use std::cmp::min;
 use std::ops::{Deref, DerefMut};
 use std::sync::{Arc, Mutex};
 
-
 struct DfsSpecial<'a> {
     graph: &'a FlexibleGraph,
     low: Vec<i32>,
@@ -41,8 +40,13 @@ impl<'a> DfsSpecial<'a> {
         self.disc[u] = self.time as i32;
         self.low[u] = self.time as i32;
 
-        for (&v, ei) in self.graph.neighbors[u].iter().zip(self.graph.edge_indices[u].iter()) {
-            if v == p || self.ignore.contains(ei) { continue; }
+        for (&v, ei) in self.graph.neighbors[u]
+            .iter()
+            .zip(self.graph.edge_indices[u].iter())
+        {
+            if v == p || self.ignore.contains(ei) {
+                continue;
+            }
             if self.disc[v] == -1 {
                 let before_time = self.time;
                 self.dfs(v, u);
@@ -53,7 +57,8 @@ impl<'a> DfsSpecial<'a> {
                     self.ans = Some(subtree_size * other_size);
                 }
                 self.low[u] = min(self.low[u], self.low[v]);
-            } else { // back edge
+            } else {
+                // back edge
                 self.low[u] = min(self.low[u], self.disc[v]);
             }
         }
@@ -67,7 +72,6 @@ impl<'a> DfsSpecial<'a> {
         self.ans
     }
 }
-
 
 pub fn run(content: &str) -> usize {
     let dict = Dictionary::default();
@@ -89,10 +93,13 @@ pub fn run(content: &str) -> usize {
     let iter: Vec<(usize, usize)> = (0..m).flat_map(|i| (0..i).map(move |j| (i, j))).collect();
 
     let cnt = Arc::new(Mutex::new(0usize));
-    let ans: Vec<_> = iter.par_iter().flat_map(|(i, j)| {
-        let mut dfs = DfsSpecial::new(&graph, [*i, *j]);
-        dfs.solve()
-    }).collect();
+    let ans: Vec<_> = iter
+        .par_iter()
+        .flat_map(|(i, j)| {
+            let mut dfs = DfsSpecial::new(&graph, [*i, *j]);
+            dfs.solve()
+        })
+        .collect();
 
     ans[0]
 }

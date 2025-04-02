@@ -1,9 +1,7 @@
 use std::cmp::PartialEq;
-use color_eyre::eyre::anyhow;
 use itertools::Itertools;
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, VecDeque};
-use std::mem::swap;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 enum Operation {
