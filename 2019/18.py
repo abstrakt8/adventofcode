@@ -16,7 +16,7 @@ class State:
 
 
 def alpha_idx(c: str):
-    if c == '@':
+    if not c.isalpha():
         return None
     return ord(c.lower()) - ord('a')
 
@@ -26,8 +26,22 @@ def is_bit_set(mask: int, i) -> bool:
 
 
 def solve(input_file: str):
-    grid = input_file.splitlines()
+    grid = [list(s) for s in input_file.splitlines()]
     n, m = len(grid), len(grid[0])
+
+    def modify():
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == "@":
+                    for x in [-1, 0, 1]:
+                        for y in [-1, 0, 1]:
+                            grid[i+x][j+y] = '#'
+                    grid[i-1][j-1] = '@'
+                    grid[i-1][j+1] = '!'
+                    grid[i+1][j-1] = '%'
+                    grid[i+1][j+1] = '$'
+                    return
+
 
     def neighbors(x, y):
         for (dx, dy) in [(0, 1), (0, -1), (-1, 0), (1, 0)]:
@@ -35,8 +49,12 @@ def solve(input_file: str):
             if 0 <= nx < n and 0 <= ny < m:
                 yield nx, ny
 
+    def is_entrance(c: str):
+        return c in "@!$%"
     def key_field(c: str):
-        return c.isalpha() or c == "@"
+        return c.isalpha() or is_entrance(c)
+
+    modify()
 
     dist: DefaultDict[str, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(int))
     keys = set()
@@ -44,7 +62,7 @@ def solve(input_file: str):
         for (j, cell) in enumerate(row):
             if not key_field(cell):
                 continue
-            if cell != '@' and cell.islower():
+            if not is_entrance(cell) and cell.islower():
                 keys.add(cell)
             q = deque([(i, j)])
             seen = {(i, j)}
@@ -62,33 +80,40 @@ def solve(input_file: str):
                             seen.add((nx, ny))
                 steps += 1
 
-    pq = [(0, '@', 0)]
+    for row in grid:
+        print("".join(row))
+
+    pq = [(0, ('@', '!', '$', '%'), 0)]
     cost = defaultdict(lambda: 10 ** 9)
-    cost[('@', 0)] = 0
+    cost[(('@', '!', '$', '%'), 0)] = 0
     while pq:
-        (cur_cost, cur_pos, cur_mask) = heapq.heappop(pq)
+        (cur_cost, cur_poss, cur_mask) = heapq.heappop(pq)
         if cur_mask.bit_count() == len(keys):
             return cur_cost
 
-        if cur_cost != cost[(cur_pos, cur_mask)]:
+        if cur_cost != cost[(cur_poss, cur_mask)]:
             continue
-        for new_pos in dist[cur_pos]:
-            vi = alpha_idx(new_pos)
-            if not (new_pos == '@' or new_pos.islower() or is_bit_set(cur_mask, vi)):
-                continue
+        for who in range(len(cur_poss)):
+            cur_pos = cur_poss[who]
+            for new_pos in dist[cur_pos]:
+                vi = alpha_idx(new_pos)
+                if not (is_entrance(new_pos) or new_pos.islower() or is_bit_set(cur_mask, vi)):
+                    continue
 
-            new_cost = cur_cost + dist[cur_pos][new_pos]
-            new_mask = cur_mask
-            if vi is not None:
-                new_mask |= (1 << vi)
+                new_poss: tuple[str, str, str, str] = cur_poss[:who] + (new_pos, ) + cur_poss[who+1:]
+                new_cost = cur_cost + dist[cur_pos][new_pos]
+                new_mask = cur_mask
+                if vi is not None:
+                    new_mask |= (1 << vi)
 
-            if new_cost < cost[(new_pos, new_mask)]:
-                cost[(new_pos, new_mask)] = new_cost
-                heapq.heappush(pq, (new_cost, new_pos, new_mask))
+                if new_cost < cost[(new_poss, new_mask)]:
+                    cost[(new_poss, new_mask)] = new_cost
+                    heapq.heappush(pq, (new_cost, new_poss, new_mask))
     return -1
 
 prefix = "../inputs/y19/",
-inputs = [("18.1.in", 132), ("18.2.in", 136), ("18.3.in", 81), ("18.in", None)]
+# inputs = [("18.1.in", 132), ("18.2.in", 136), ("18.3.in", 81), ("18.in", None)]
+inputs = [("18.4.in", 8), ("18.in", None)]
 for (file, expected) in inputs:
     with open("../inputs/y19/" + file, 'r') as f:
         print(solve(f.read()), expected)
